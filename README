@@ -1,0 +1,30 @@
+Computer Graphics Final Project
+
+This Project creates a scene in three different modes that allows navigation in
+first person view around a natural scene created with fractal shapes.
+
+The three unique modes for this scene are:
+Day Mode: Navigating through the scene with full light and a moving sun.
+Night Mode: Navigating through the scene with minimal ambient light and a flashlight shining directly in front of the view
+Stormy Mode: Navigating through the scene with low ambient light with flashes coming from a fractal created lighting bolt.
+
+Tyler Lugger
+
+Key bindings
+  l          Toggles lighting
+  a/A        Decrease/increase ambient light
+  r/R        Decrease/increase repetition of texture
+  F1         Toggle smooth/flat shading
+  F2         Toggle local viewer mode
+  F3         Toggle light distance (1/5)
+  F8         Change ball increment
+  F9         Invert bottom normal
+  m          Toggles light movement
+  []         Lower/rise light
+  p          Toggles ortogonal/perspective projection
+  +/-        Change field of view of perspective
+  x          Toggle axes
+  arrows     Change view angle
+  PgDn/PgUp  Zoom in and out
+  0          Reset view angle
+  ESC        Exit
