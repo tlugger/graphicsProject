@@ -24,14 +24,20 @@
 #include "CSCIx229.h"
 
 int axes=0;       //  Display axes
-int mode=1;       //  Projection mode
+//int mode=0;       //  Projection mode
 int move=1;       //  Move light
 int th=0;         //  Azimuth of view angle
 int ph=0;         //  Elevation of view angle
-int fov=25;       //  Field of view (for perspective)
+int fov=55;       //  Field of view (for perspective)
 int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
-double dim=2.0;   //  Size of world
+double dim=5.0;   //  Size of world
+int fpv = 1;
+double Fx = 0.0; // Global variable for camera x pos
+double Fy = 0.05; // Global variable for camera y pos
+double Fz = 0.0; // Global variable for camera z pos
+double Lx, Ly, Lz; // Global variables for what camera looks at
+int l = 0; // Global variable for look angle
 // Light values
 //int one       =   1;  // Unit value
 int distance  =   5;  // Light distance
@@ -407,12 +413,15 @@ void display()
         //  Undo previous transformations
         glLoadIdentity();
         //  Perspective - set eye position
-        if (mode)
-        {
-                double Ex = -2*dim*Sin(th)*Cos(ph);
-                double Ey = +2*dim        *Sin(ph);
-                double Ez = +2*dim*Cos(th)*Cos(ph);
-                gluLookAt(Ex,Ey+.4,Ez, 0,.4,0, 0,Cos(ph),0);
+        if (fpv) {
+                ph = 0;
+                th = 0;
+                Lx = 10*Sin(l); // Some large radius for the fpv camera to move around
+                Ly = 0.05;
+                Lz = 10*Cos(l); // Some large radius for the fpv camera to move around
+                gluLookAt(Fx,Fy,Fz, Lx,Ly,Lz, 0,1,0); // Look from camera position to a certian direction.
+                glRotatef(ph,1,0,0);
+                glRotatef(th,0,1,0);
         }
         //  Orthogonal - set world orientation
         else
@@ -457,13 +466,6 @@ void display()
                 glDisable(GL_LIGHTING);
 
         //  Draw scene
-        //engine(+1,0,0,.5);
-        //ball(-1,0,0, 0.5);
-        //cylinder(0,-.5,+1, .5, 1);
-        //nose(0,-.5,-1, .5,.2,1);
-
-        // Draw Falcon 9 rocket modeled after this image http://deepspaceindustries.com/wp-content/uploads/2015/06/falcon9.jpg
-
         ground(2.0);
         launchPad(0,-.08,0, .15, .35,.08);
         engine(0,0,0, .01); // Nine engine bells
@@ -519,8 +521,8 @@ void display()
 
         //  Display parameters
         glWindowPos2i(5,5);
-        Print("Angle=%d,%d  Dim=%.1f FOV=%d Projection=%s Light=%s",
-              th,ph,dim,fov,mode ? "Perpective" : "Orthogonal",light ? "On" : "Off");
+        Print("Angle=%d,%d  Dim=%.1f FOV=%d Light=%s",
+              th,ph,dim,fov,light ? "On" : "Off");
         if (light)
         {
                 glWindowPos2i(5,45);
@@ -552,40 +554,73 @@ void idle()
  */
 void special(int key,int x,int y)
 {
-        //  Right arrow key - increase angle by 5 degrees
-        if (key == GLUT_KEY_RIGHT)
-                th += 5;
-        //  Left arrow key - decrease angle by 5 degrees
-        else if (key == GLUT_KEY_LEFT)
-                th -= 5;
-        //  Up arrow key - increase elevation by 5 degrees
-        else if (key == GLUT_KEY_UP)
-                ph += 5;
-        //  Down arrow key - decrease elevation by 5 degrees
-        else if (key == GLUT_KEY_DOWN)
-                ph -= 5;
-        //  PageUp key - increase dim
-        else if (key == GLUT_KEY_PAGE_DOWN)
-                dim += 0.1;
-        //  PageDown key - decrease dim
-        else if (key == GLUT_KEY_PAGE_UP && dim>1)
-                dim -= 0.1;
-        //  Smooth color model
-        else if (key == GLUT_KEY_F1)
-                smooth = 1-smooth;
-        //  Local Viewer
-        else if (key == GLUT_KEY_F2)
-                local = 1-local;
-        else if (key == GLUT_KEY_F3)
-                distance = (distance==1) ? 5 : 1;
-        //  Toggle ball increment
-        else if (key == GLUT_KEY_F8)
-                inc = (inc==10) ? 3 : 10;
+        if (fpv == 1) {
+                //  Right arrow key - decrease angle by 45 degrees
+                if (key == GLUT_KEY_RIGHT) {
+                        l -= 5;
+                }
+                //  Left arrow key - increase angle by 45 degrees
+                else if (key == GLUT_KEY_LEFT) {
+                        l += 5;
+                }
+                //  Up arrow key - increase camera posoition and posotion of what camera looks at
+                else if (key == GLUT_KEY_UP) {
+                        // Define forward for each of the possible 8 view angles
+                        Fx += .05*Sin(l);
+                        Fz += .05*Cos(l);
+                        Lx += .05*Sin(l);
+                        Lz += .05*Cos(l);
+                }
+                //  Down arrow key - decrease camera position and position of what camera looks at
+                else if (key == GLUT_KEY_DOWN) {
+                        Fx -= .05*Sin(l);
+                        Fz -= .05*Cos(l);
+                        Lx -= .05*Sin(l);
+                        Lz -= .05*Cos(l);
+                }
+
+                l  %= 360;
+        }
+        else{
+                //  Right arrow key - increase angle by 5 degrees
+                if (key == GLUT_KEY_RIGHT)
+                        th += 5;
+                //  Left arrow key - decrease angle by 5 degrees
+                else if (key == GLUT_KEY_LEFT)
+                        th -= 5;
+                //  Up arrow key - increase elevation by 5 degrees
+                else if (key == GLUT_KEY_UP)
+                        ph += 5;
+                //  Down arrow key - decrease elevation by 5 degrees
+                else if (key == GLUT_KEY_DOWN)
+                        ph -= 5;
+                //  PageUp key - increase dim
+                else if (key == GLUT_KEY_PAGE_DOWN)
+                        dim += 0.1;
+                //  PageDown key - decrease dim
+                else if (key == GLUT_KEY_PAGE_UP && dim>1)
+                        dim -= 0.1;
+                //  Smooth color model
+                else if (key == GLUT_KEY_F1)
+                        smooth = 1-smooth;
+                //  Local Viewer
+                else if (key == GLUT_KEY_F2)
+                        local = 1-local;
+                else if (key == GLUT_KEY_F3)
+                        distance = (distance==1) ? 5 : 1;
+                //  Toggle ball increment
+                else if (key == GLUT_KEY_F8)
+                        inc = (inc==10) ? 3 : 10;
+        }
         //  Keep angles to +/-360 degrees
         th %= 360;
         ph %= 360;
+
         //  Update projection
-        Project(mode ? fov : 0,asp,dim);
+        if (fpv)
+                Project(1,fov,asp,dim);
+        else
+                Project(0,0,asp,dim);
         //  Tell GLUT it is necessary to redisplay the scene
         glutPostRedisplay();
 }
@@ -607,9 +642,6 @@ void key(unsigned char ch,int x,int y)
         //  Toggle lighting
         else if (ch == 'l' || ch == 'L')
                 light = 1-light;
-        //  Switch projection mode
-        else if (ch == 'p' || ch == 'P')
-                mode = 1-mode;
         //  Toggle light movement
         else if (ch == 'm' || ch == 'M')
                 move = 1-move;
@@ -623,6 +655,8 @@ void key(unsigned char ch,int x,int y)
                 fov--;
         else if (ch == '+' && ch<179)
                 fov++;
+        else if (ch == 'f')
+                fov = 1 - fov;
         //  Light elevation
         else if (ch=='[')
                 ylight -= .1;
@@ -640,7 +674,10 @@ void key(unsigned char ch,int x,int y)
         if (rep<1) rep = 1;
 
         //  Reproject
-        Project(mode ? fov : 0,asp,dim);
+        if (fpv)
+                Project(1,fov,asp,dim);
+        else
+                Project(0,0,asp,dim);
         //  Animate if requested
         glutIdleFunc(move ? idle : NULL);
         //  Tell GLUT it is necessary to redisplay the scene
@@ -657,7 +694,10 @@ void reshape(int width,int height)
         //  Set the viewport to the entire window
         glViewport(0,0, width,height);
         //  Set projection
-        Project(mode ? fov : 0,asp,dim);
+        if (fpv)
+                Project(1,fov,asp,dim);
+        else
+                Project(0,0,asp,dim);
 }
 
 /*
@@ -669,7 +709,7 @@ int main(int argc,char* argv[])
         glutInit(&argc,argv);
         //  Request double buffered, true color window with Z buffering at 600x600
         glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-        glutInitWindowSize(400,500);
+        glutInitWindowSize(600,600);
         glutCreateWindow("Tyler Lugger");
         //  Set callbacks
         glutDisplayFunc(display);
