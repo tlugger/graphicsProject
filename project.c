@@ -10,10 +10,12 @@ void Project(int fpv,double fov,double asp,double dim)
         //  Undo previous transformations
         glLoadIdentity();
         //  Perspective transformation
-        if (fpv == 1)
+        if (fpv) {
                 gluPerspective(fov,asp,.01,4*dim);
-        else
+        }
+        else{
                 glOrtho(-asp*dim,asp*dim,-dim,+dim,-dim,+dim);
+        }
         //  Switch to manipulating the model matrix
         glMatrixMode(GL_MODELVIEW);
         //  Undo previous transformations

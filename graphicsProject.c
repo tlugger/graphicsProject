@@ -485,7 +485,7 @@ void display()
         cylinder(0,.734,0, .052,.1, .8,.8,.8);
         nose(0,.834,0, .052,.015,.071);
 
-        cylinder(1, 0, 0, .5, .5, 1, 1, 1);
+        cylinder(1,-.08,0, .5,.5, 1,1,1);
 
         glNormal3f(0,0,1);
         fin(0,.05,0, 0,.05,.07);
@@ -495,6 +495,7 @@ void display()
         fin(0,.05,0, .07,.05,0);
         glNormal3f(-1,0,0);
         fin(0,.05,0, -.07,.05,0);
+
 
 
         //  Draw axes - no lighting from here on
@@ -554,7 +555,7 @@ void idle()
  */
 void special(int key,int x,int y)
 {
-        if (fpv == 1) {
+        if (fpv) {
                 //  Right arrow key - decrease angle by 45 degrees
                 if (key == GLUT_KEY_RIGHT) {
                         l -= 5;
@@ -578,10 +579,8 @@ void special(int key,int x,int y)
                         Lx -= .05*Sin(l);
                         Lz -= .05*Cos(l);
                 }
-
-                l  %= 360;
         }
-        else{
+        if(!fpv) {
                 //  Right arrow key - increase angle by 5 degrees
                 if (key == GLUT_KEY_RIGHT)
                         th += 5;
@@ -613,6 +612,7 @@ void special(int key,int x,int y)
                         inc = (inc==10) ? 3 : 10;
         }
         //  Keep angles to +/-360 degrees
+        l  %= 360;
         th %= 360;
         ph %= 360;
 
@@ -620,7 +620,7 @@ void special(int key,int x,int y)
         if (fpv)
                 Project(1,fov,asp,dim);
         else
-                Project(0,0,asp,dim);
+                Project(0,fov,asp,dim);
         //  Tell GLUT it is necessary to redisplay the scene
         glutPostRedisplay();
 }
@@ -656,7 +656,7 @@ void key(unsigned char ch,int x,int y)
         else if (ch == '+' && ch<179)
                 fov++;
         else if (ch == 'f')
-                fov = 1 - fov;
+                fpv = 1 - fpv;
         //  Light elevation
         else if (ch=='[')
                 ylight -= .1;
@@ -677,7 +677,7 @@ void key(unsigned char ch,int x,int y)
         if (fpv)
                 Project(1,fov,asp,dim);
         else
-                Project(0,0,asp,dim);
+                Project(0,fov,asp,dim);
         //  Animate if requested
         glutIdleFunc(move ? idle : NULL);
         //  Tell GLUT it is necessary to redisplay the scene
@@ -697,7 +697,7 @@ void reshape(int width,int height)
         if (fpv)
                 Project(1,fov,asp,dim);
         else
-                Project(0,0,asp,dim);
+                Project(0,fov,asp,dim);
 }
 
 /*
