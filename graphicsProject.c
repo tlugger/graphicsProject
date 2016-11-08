@@ -39,7 +39,6 @@ double Fz = 0.0; // Global variable for camera z pos
 double Lx, Ly, Lz; // Global variables for what camera looks at
 int l = 0; // Global variable for look angle
 // Light values
-//int one       =   1;  // Unit value
 int distance  =   5;  // Light distance
 int inc       =  10;  // Ball increment
 int smooth    =   1;  // Smooth/Flat shading
@@ -53,7 +52,7 @@ float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   1.0;  // Elevation of light
 int rep       =   1;
-unsigned int texture[3];
+unsigned int texture[5];
 
 /*
  *  Draw vertex in polar coordinates with normal
@@ -61,8 +60,8 @@ unsigned int texture[3];
 static void Vertex(double th,double ph)
 {
         double x = Sin(th)*Cos(ph);
-        double y = Cos(th)*Cos(ph);
-        double z =         Sin(ph);
+        double y = Sin(ph);
+        double z = Cos(th)*Cos(ph);
         //  For a sphere at the origin, the position
         //  and normal vectors are the same
         glNormal3d(x,y,z);
@@ -108,264 +107,22 @@ static void ball(double x,double y,double z,double r)
 /*
  *  Draw in positive y axis, vertex in polar coordinates with normal
  */
-static void DVertex(double th,double ph)
-{
-        double x = Sin(th)*Cos(ph);
-        double y = Cos(th)*Cos(ph);
-        double z =         Sin(ph);
-        //  For a sphere at the origin, the position
-        //  and normal vectors are the same
-        glNormal3d(x,fabs(y),z);
-        glVertex3d(x,fabs(y),z);
-}
+// static void DVertex(double th,double ph)
+// {
+//         double x = Sin(th)*Cos(ph);
+//         double y = Cos(th)*Cos(ph);
+//         double z =         Sin(ph);
+//         //  For a sphere at the origin, the position
+//         //  and normal vectors are the same
+//         glNormal3d(x,fabs(y),z);
+//         glVertex3d(x,fabs(y),z);
+// }
 
-
-
-static void cylinder(double x, double y, double z, double radius, double height, double r, double b, double g) {
-        glPushMatrix();
-        glTranslated(x,y,z);
-
-        double angle = 0.0;
-        double angle_stepsize = 0.1;
-
-        /** Draw the tube */
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        glColor3f(r,b,g);
-        glBegin(GL_QUAD_STRIP);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c = radius * cos(angle);
-                double s = radius * sin(angle);
-                glNormal3f(cos(angle), 0, sin(angle));
-                glTexCoord2f((c*height)*rep, (s*height)*rep); glVertex3f(c, height, s); //Wrap texture around cylinder
-                glTexCoord2f(c*rep, s*rep); glVertex3f(c, 0.0, s); //Wrap texture around cylinder
-                angle = angle + angle_stepsize;
-        }
-        glTexCoord2f(1*rep, 0); glVertex3f(radius, height, 0.0);
-        glTexCoord2f(0, 1*rep); glVertex3f(radius, 0.0, 0.0);
-        glEnd();
-
-        glBegin(GL_POLYGON);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c = radius * cos(angle);
-                double s = radius * sin(angle);
-                glNormal3f(0, 1, 0);
-                glTexCoord2f((rep+5)/2*cos(angle)+radius, (rep+5)/2*sin(angle)+radius); glVertex3f(c, height, s);
-                angle = angle + angle_stepsize;
-        }
-        glEnd();
-
-        glBegin(GL_POLYGON);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c = radius * cos(angle);
-                double s = radius * sin(angle);
-                glNormal3f(0, -1, 0);
-                glTexCoord2f((rep+5)/2*cos(angle)+radius, (rep+5)/2*sin(angle)+radius); glVertex3f(c, 0, s);
-                angle = angle + angle_stepsize;
-        }
-
-        glEnd();
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-
-}
-
-static void nose(double x, double y, double z, double r1, double r2, double height) {
-        glPushMatrix();
-        glTranslated(x,y,z);
-
-        double angle = 0.0;
-        double angle_stepsize = 0.1;
-
-        // Draw the side
-        //glColor3f(.8,.8,.8);
-
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        glBegin(GL_QUAD_STRIP);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c1 = r1 * cos(angle);
-                double s1 = r1 * sin(angle);
-                double c2 = r2 * cos(angle);
-                double s2 = r2 * sin(angle);
-                glNormal3f(cos(angle), 1, sin(angle));
-                glTexCoord2f(c1, s1); glVertex3f(c1, 0.0, s1);
-                glTexCoord2f(c2, s2); glVertex3f(c2, height, s2);
-                angle = angle + angle_stepsize;
-        }
-        glVertex3f(r2, height, 0.0);
-        glVertex3f(r1, 0.0, 0.0);
-        glEnd();
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-
-        glPushMatrix();
-        glTranslated(x, y+(.95*height), z);
-        glScaled(r2,r2,r2); // Make half dome
-        // Draw dome on top of nose cone
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        int theta, phi;
-        for (phi=0; phi<360; phi+=inc) {
-                glBegin(GL_QUAD_STRIP);
-                for (theta=0; theta<=90; theta+=inc) {
-                        glTexCoord2f(theta, phi); DVertex(theta,phi);
-                        glTexCoord2f(theta, phi+inc); DVertex(theta,phi+inc);
-                }
-                glEnd();
-        }
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-}
-
-static void engine(double x, double y, double z, double r){
-        glPushMatrix();
-        glTranslated(x, y, z);
-        glScaled(r,r*2,r); // Make half dome
-        // Draw dome on top of nose cone
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        int theta, phi;
-        glColor3f(.4,.4,.4);
-        for (phi=0; phi<360; phi+=inc) {
-                glBegin(GL_QUAD_STRIP);
-                for (theta=0; theta<=90; theta+=inc) {
-                        glTexCoord2f(theta, phi); DVertex(theta,phi);
-                        glTexCoord2f(theta, phi+inc); DVertex(theta,phi+inc);
-                }
-                glEnd();
-        }
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-}
-
-static void farring(double x, double y, double z, double r1, double r2, double height) {
-        glPushMatrix();
-        glTranslated(x,y,z);
-
-        double angle = 0.0;
-        double angle_stepsize = 0.1;
-
-        // Draw the side
-        glColor3f(1, 1, 1);
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        glBegin(GL_QUAD_STRIP);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c1 = r1 * cos(angle);
-                double s1 = r1 * sin(angle);
-                double c2 = r2 * cos(angle);
-                double s2 = r2 * sin(angle);
-                glNormal3f(cos(angle), 1, sin(angle));
-                glTexCoord2f(c2, s2); glVertex3f(c2, height, s2);
-                glTexCoord2f(c1, s1); glVertex3f(c1, 0.0, s1);
-                angle = angle + angle_stepsize;
-        }
-        glVertex3f(r2, height, 0.0);
-        glVertex3f(r1, 0.0, 0.0);
-        glEnd();
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-}
-
-static void fin(double x, double y, double z, double dx, double dy, double dz){
-        glPushMatrix();
-        //  Offset and rotate
-        glTranslated(x,y,z);
-
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glColor3f(1,1,1);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        glBegin(GL_QUADS);
-
-        glColor3f(.4,.4,.4);
-        glTexCoord2f(0,0); glVertex3f(x,y,z);
-        glTexCoord2f(1,0); glVertex3f(x+dx,y,z+dz);
-        glTexCoord2f(1,1); glVertex3f(x+dx,y+dy,z+dz);
-        glTexCoord2f(0,1); glVertex3f(x,y+(1.5*dy),z);
-
-        glEnd();
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-}
-
-static void launchPad(double x,double y, double z, double r1, double r2, double height) {
-        glPushMatrix();
-        glTranslated(x,y,z);
-
-        double angle = 0.0;
-        double angle_stepsize = 0.1;
-
-        // Draw the side
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glColor3f(1,1,1);
-        glBindTexture(GL_TEXTURE_2D,texture[1]);
-
-        glBegin(GL_QUAD_STRIP);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c1 = r1 * cos(angle);
-                double s1 = r1 * sin(angle);
-                double c2 = r2 * cos(angle);
-                double s2 = r2 * sin(angle);
-
-                glNormal3f(cos(angle), 1, sin(angle));
-                glTexCoord2f(c1*rep, s1*rep); glVertex3f(c1, height, s1);
-                glTexCoord2f(c2*rep, s2*rep); glVertex3f(c2, 0.0, s2);
-                angle = angle + angle_stepsize;
-        }
-        glVertex3f(r1, height, 0.0);
-        glVertex3f(r2, 0.0, 0.0);
-        glEnd();
-
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glColor3f(1,1,1);
-        glBindTexture(GL_TEXTURE_2D,texture[1]);
-
-        glBegin(GL_POLYGON);
-        angle = 0.0;
-        while( angle < 2*M_PI ) {
-                double c = r1 * cos(angle);
-                double s = r1 * sin(angle);
-                glNormal3f(0, 1, 0);
-                glVertex3f(c, height, s);
-                glTexCoord2f((rep+5)/2*cos(angle)+r1, (rep+5)/2*sin(angle)+r1);
-                angle = angle + angle_stepsize;
-        }
-        //glVertex3f(r1, height, 0.0);
-        glEnd();
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
-}
-
-static void ground(double r){
+/*
+ * Draw a tree conisiting of a brown base and green sphere
+ * Base code for cylinder is modified from GitHub users: nikAizuddin
+ */
+static void tree(double x, double z, double radius, double height){
         //  Set specular color to white
         float white[] = {1,1,1,1};
         float Emission[]  = {0.0,0.0,0.01*emission,1.0};
@@ -374,29 +131,67 @@ static void ground(double r){
         glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
 
         glPushMatrix();
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glColor3f(1,1,1);
-        glBindTexture(GL_TEXTURE_2D,texture[0]);
-
-        glBegin(GL_POLYGON);
-        glColor3f(0, .45, 0);
+        glTranslated(x,0,z);
 
         double angle = 0.0;
         double angle_stepsize = 0.1;
-        while( angle < 2*M_PI ) {
-                double c = r * cos(angle);
-                double s = r * sin(angle);
-                glNormal3f(0, 1, 0);
-                glTexCoord2f((rep+5)/2*cos(angle)+r, (rep+5)/2*sin(angle)+r); glVertex3f(c, -0.08, s);
 
+        /** Draw the tube */
+        //  Enable textures
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[3]);
+
+        glColor3f(1,1,1);
+        glBegin(GL_QUAD_STRIP);
+        angle = 0.0;
+        while( angle < 2*M_PI+.1 ) {
+                double c = radius * cos(angle);
+                double s = radius * sin(angle);
+                glNormal3f(cos(angle), 0, sin(angle));
+                glTexCoord2f((height*c)*(10*rep), (height*s)*(10*rep)); glVertex3f(c, height, s);
+                glTexCoord2f(c*(10*rep), s*(10*rep)); glVertex3f(c, 0.0, s);
                 angle = angle + angle_stepsize;
         }
-        //glVertex3f(0.0, -0.08, 0.0);
         glEnd();
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
+
+        // Draw sphere on top of cylinder
+        glPushMatrix();
+        glTranslated(x,height,z);
+        glScaled(4*radius,4*radius,4*radius);
+
+        //  Enable textures
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[4]);
+
+        const double d = 5;
+        glBegin(GL_TRIANGLE_FAN);
+        Vertex(0,-90);
+        for (int th=0; th<=360; th+=d)
+        {
+                Vertex(th,d-90);
+        }
+        glEnd();
+
+        //  Latitude bands
+        for ( int ph=d-90; ph<=90-2*d; ph+=d)
+        {
+                glBegin(GL_QUAD_STRIP);
+                for (int th=0; th<=360; th+=d)
+                {
+                        glTexCoord2f(th, ph); Vertex(th,ph);
+                        glTexCoord2f(th, ph+d); Vertex(th,ph+d);
+                }
+                glEnd();
+
+
+        }
+        glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
+
 }
 
 /*
@@ -466,36 +261,12 @@ void display()
                 glDisable(GL_LIGHTING);
 
         //  Draw scene
-        ground(2.0);
-        launchPad(0,-.08,0, .15, .35,.08);
-        engine(0,0,0, .01); // Nine engine bells
-        engine(.03,0,0, .01);
-        engine(-.03,0,0, .01);
-        engine(0,0,.03, .01);
-        engine(0,0,-.03, .01);
-        engine(.015,0,.015, .01);
-        engine(-.015,0,-.015, .01);
-        engine(.015,0,-.015, .01);
-        engine(-.015,0,.015, .01);
-        cylinder(0,0.02,0, .0366,.050, .1,.1,.1);//Main body cylinder
-        cylinder(0,.07,0, .0366,.484, .8,.8,.8);
-        cylinder(0,.554,0, .0366,.1, .1,.1,.1);
-        cylinder(0,.654,0, .0366,.05, .8,.8,.8);
-        farring(0,.704,0, .0366,.052,.03);
-        cylinder(0,.734,0, .052,.1, .8,.8,.8);
-        nose(0,.834,0, .052,.015,.071);
 
-        cylinder(1,-.08,0, .5,.5, 1,1,1);
-
-        glNormal3f(0,0,1);
-        fin(0,.05,0, 0,.05,.07);
-        glNormal3f(0,0,-1);
-        fin(0,.05,0, 0,.05,-.07);
-        glNormal3f(1,0,0);
-        fin(0,.05,0, .07,.05,0);
-        glNormal3f(-1,0,0);
-        fin(0,.05,0, -.07,.05,0);
-
+        for (double i=-15; i<15; i+=3) {
+                for(double j=-15; j<15; j+=3) {
+                        tree(i/10, j/10, .04, .5);
+                }
+        }
 
 
         //  Draw axes - no lighting from here on
@@ -721,6 +492,8 @@ int main(int argc,char* argv[])
         texture[0] = LoadTexBMP("grass.bmp");
         texture[1] = LoadTexBMP("dirt.bmp");
         texture[2] = LoadTexBMP("metal.bmp");
+        texture[3] = LoadTexBMP("bark.bmp");
+        texture[4] = LoadTexBMP("leaves.bmp");
         //  Pass control to GLUT so it can interact with the user
         ErrCheck("init");
         glutMainLoop();
