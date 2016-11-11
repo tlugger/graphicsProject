@@ -3,6 +3,9 @@
  *  Computer Graphics Final Project
  *
  *  Key bindings:
+ *  d          Toggles day/night mode
+ *  w          Increases camera view angle
+ *  s          Decreases camera view angle
  *  l          Toggles lighting
  *  r/R        Decrease/increase repetition of texture
  *  a/A        Decrease/increase ambient light
@@ -25,6 +28,7 @@
 
 int axes=0;       //  Display axes
 //int mode=0;       //  Projection mode
+int day = 1;
 int move=1;       //  Move light
 int th=0;         //  Azimuth of view angle
 int ph=0;         //  Elevation of view angle
@@ -33,18 +37,20 @@ int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
 double dim=5.0;   //  Size of world
 int fpv = 1;
+int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
 double Fy = 0.05; // Global variable for camera y pos
 double Fz = 0.0; // Global variable for camera z pos
-double Lx, Ly, Lz; // Global variables for what camera looks at
-int l = 0; // Global variable for look angle
+double Lx = 0; // Some large radius for the fpv camera to move around
+double Ly = 0.05;
+double Lz = 10; // Some large radius for the fpv camera to move around // Global variables for what camera looks at
 // Light values
 int distance  =   5;  // Light distance
 int inc       =  10;  // Ball increment
 int smooth    =   1;  // Smooth/Flat shading
 int local     =   0;  // Local Viewer Model
 int emission  =   0;  // Emission intensity (%)
-int ambient   =  30;  // Ambient intensity (%)
+int ambient   =  30;
 int diffuse   = 100;  // Diffuse intensity (%)
 int specular  =   0;  // Specular intensity (%)
 int shininess =   0;  // Shininess (power of two)
@@ -122,6 +128,39 @@ static void ball(double x,double y,double z,double r)
  * Draw a tree conisiting of a brown base and green sphere
  * Base code for cylinder is modified from GitHub users: nikAizuddin
  */
+static void ground(double r){
+        //  Set specular color to white
+        float white[] = {1,1,1,1};
+        float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+        glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
+
+        glPushMatrix();
+        //  Enable textures
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glColor3f(1,1,1);
+        glBindTexture(GL_TEXTURE_2D,texture[0]);
+
+        glBegin(GL_TRIANGLE_FAN);
+        glColor3f(1, 1, 1);
+
+        double angle = 0.0;
+        double angle_stepsize = 0.1;
+        while( angle < 2*M_PI ) {
+                double c = r * cos(angle);
+                double s = r * sin(angle);
+                glNormal3f(0, 1, 0);
+                glTexCoord2f((rep+10)/2*cos(angle)+r, (rep+10)/2*sin(angle)+r); glVertex3f(c, 0, s);
+
+                angle = angle + angle_stepsize;
+        }
+        glEnd();
+        glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
+}
+
 static void tree(double x, double z, double radius, double height){
         //  Set specular color to white
         float white[] = {1,1,1,1};
@@ -211,9 +250,8 @@ void display()
         if (fpv) {
                 ph = 0;
                 th = 0;
-                Lx = 10*Sin(l); // Some large radius for the fpv camera to move around
-                Ly = 0.05;
-                Lz = 10*Cos(l); // Some large radius for the fpv camera to move around
+                Lx = 10*Sin(l);
+                Lz = 10*Cos(l);
                 gluLookAt(Fx,Fy,Fz, Lx,Ly,Lz, 0,1,0); // Look from camera position to a certian direction.
                 glRotatef(ph,1,0,0);
                 glRotatef(th,0,1,0);
@@ -231,40 +269,54 @@ void display()
         //  Light switch
         if (light)
         {
-                //  Translate intensity to color vectors
+
+                ambient = (day) ? 30 : 0;
                 float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
                 //  Light position
                 float Position[]  = {distance*Cos(zh),ylight,distance*Sin(zh),1.0};
                 //  Draw light position as ball (still no lighting here)
-                glColor3f(1,1,1);
-                ball(Position[0],Position[1],Position[2], .1);
                 //  OpenGL should normalize normal vectors
-                glEnable(GL_NORMALIZE);
-                //  Enable lighting
-                glEnable(GL_LIGHTING);
-                //  Location of viewer for specular calculations
-                glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
-                //  glColor sets ambient and diffuse color materials
-                glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-                glEnable(GL_COLOR_MATERIAL);
-                //  Enable light 0
-                glEnable(GL_LIGHT0);
-                //  Set ambient, diffuse, specular components and position of light 0
-                glLightfv(GL_LIGHT0,GL_AMBIENT,Ambient);
-                glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
-                glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
-                glLightfv(GL_LIGHT0,GL_POSITION,Position);
+
+                if (day) {
+                        glEnable(GL_NORMALIZE);
+                        //  Enable lighting
+                        glEnable(GL_LIGHTING);
+                        glColor3f(1,1,1);
+                        ball(Position[0],Position[1],Position[2], .1);
+                        //  Location of viewer for specular calculations
+                        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+                        //  glColor sets ambient and diffuse color materials
+                        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+                        glEnable(GL_COLOR_MATERIAL);
+                        //  Enable light 0
+                        glEnable(GL_LIGHT0);
+                        //  Set ambient, diffuse, specular components and position of light 0
+                        glLightfv(GL_LIGHT0,GL_AMBIENT,Ambient);
+                        glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
+                        glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+                        glLightfv(GL_LIGHT0,GL_POSITION,Position);
+                }
+                else {
+                        glEnable(GL_NORMALIZE);
+                        glEnable(GL_LIGHTING);
+                        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+                        //  glColor sets ambient and diffuse color materials
+                        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+                        glEnable(GL_COLOR_MATERIAL);
+                }
+
         }
         else
                 glDisable(GL_LIGHTING);
 
         //  Draw scene
-
+        ground(2);
         for (double i=-15; i<15; i+=3) {
                 for(double j=-15; j<15; j+=3) {
-                        tree(i/10, j/10, .04, .5);
+                        if (i || j !=0)
+                                tree(i/10, j/10, .04, .5);
                 }
         }
 
@@ -442,6 +494,12 @@ void key(unsigned char ch,int x,int y)
                 rep -= 1;
         else if (ch=='R')
                 rep += 1;
+        else if (ch == 'd')
+                day = 1-day;
+        else if (ch == 'w')
+                Ly += .5;
+        else if (ch == 's')
+                Ly -= .5;
         if (rep<1) rep = 1;
 
         //  Reproject
