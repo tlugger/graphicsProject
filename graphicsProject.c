@@ -65,7 +65,7 @@ float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   1.0;  // Elevation of light
 int rep       =   1;
-unsigned int texture[5];
+unsigned int texture[3];
 
 /*
  *  Draw vertex in polar coordinates with normal
@@ -191,7 +191,7 @@ static void tree(double x, double z, double radius, double height){
         //  Enable textures
         glEnable(GL_TEXTURE_2D);
         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[3]);
+        glBindTexture(GL_TEXTURE_2D,texture[1]);
 
         glColor3f(1,1,1);
         glBegin(GL_QUAD_STRIP);
@@ -216,7 +216,7 @@ static void tree(double x, double z, double radius, double height){
         //  Enable textures
         glEnable(GL_TEXTURE_2D);
         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[4]);
+        glBindTexture(GL_TEXTURE_2D,texture[2]);
 
         const double d = 5;
         glBegin(GL_TRIANGLE_FAN);
@@ -593,10 +593,8 @@ int main(int argc,char* argv[])
         glutIdleFunc(idle);
         //  Load textures
         texture[0] = LoadTexBMP("grass.bmp");
-        texture[1] = LoadTexBMP("dirt.bmp");
-        texture[2] = LoadTexBMP("metal.bmp");
-        texture[3] = LoadTexBMP("bark.bmp");
-        texture[4] = LoadTexBMP("leaves.bmp");
+        texture[1] = LoadTexBMP("bark.bmp");
+        texture[2] = LoadTexBMP("leaves.bmp");
         //  Pass control to GLUT so it can interact with the user
         ErrCheck("init");
         glutMainLoop();
