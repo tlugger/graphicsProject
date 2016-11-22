@@ -28,14 +28,15 @@
 
 int axes=0;       //  Display axes
 //int mode=0;       //  Projection mode
-int day = 1;
+int day = 0;
 int move=1;       //  Move light
+int side=0;       //  Two sided mode
 int th=0;         //  Azimuth of view angle
 int ph=0;         //  Elevation of view angle
 int fov=55;       //  Field of view (for perspective)
 int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
-double dim=5.0;   //  Size of world
+double dim=10.0;   //  Size of world
 int fpv = 1;
 int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
@@ -49,6 +50,12 @@ int distance  =   5;  // Light distance
 int inc       =  10;  // Ball increment
 int smooth    =   1;  // Smooth/Flat shading
 int local     =   0;  // Local Viewer Model
+int Th=0,Ph=30;   //  Light angles
+float sco=180;    //  Spot cutoff angle
+float Exp=0;      //  Spot exponent
+int at0=100;      //  Constant  attenuation %
+int at1=0;        //  Linear    attenuation %
+int at2=0;        //  Quadratic attenuation %
 int emission  =   0;  // Emission intensity (%)
 int ambient   =  30;
 int diffuse   = 100;  // Diffuse intensity (%)
@@ -143,19 +150,24 @@ static void ground(double r){
         glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D,texture[0]);
 
-        glBegin(GL_TRIANGLE_FAN);
+        glBegin(GL_QUADS);
         glColor3f(1, 1, 1);
 
-        double angle = 0.0;
-        double angle_stepsize = 0.1;
-        while( angle < 2*M_PI ) {
-                double c = r * cos(angle);
-                double s = r * sin(angle);
-                glNormal3f(0, 1, 0);
-                glTexCoord2f((rep+10)/2*cos(angle)+r, (rep+10)/2*sin(angle)+r); glVertex3f(c, 0, s);
+        glTexCoord2f(0, 0); glVertex3f(-r, 0, -r);
+        glTexCoord2f(0, rep+r); glVertex3f(-r, 0, r);
+        glTexCoord2f(rep+r, rep+r); glVertex3f(r, 0, r);
+        glTexCoord2f(rep+r, 0); glVertex3f(r, 0, -r);
 
-                angle = angle + angle_stepsize;
-        }
+        // double angle = 0.0;
+        // double angle_stepsize = 0.1;
+        // while( angle < 2*M_PI ) {
+        //         double c = r * cos(angle);
+        //         double s = r * sin(angle);
+        //         glNormal3f(0, 1, 0);
+        //         glTexCoord2f((rep+10)/2*cos(angle)+r, (rep+10)/2*sin(angle)+r); glVertex3f(c, 0, s);
+        //
+        //         angle = angle + angle_stepsize;
+        // }
         glEnd();
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
@@ -234,6 +246,13 @@ static void tree(double x, double z, double radius, double height){
 }
 
 /*
+ * Function to draw a flashlight
+ */
+/*static void flashlight(){
+
+}*/
+
+/*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
 void display()
@@ -267,52 +286,78 @@ void display()
         glShadeModel(smooth ? GL_SMOOTH : GL_FLAT);
 
         //  Light switch
-        if (light)
+        if (day)
         {
-
-                ambient = (day) ? 30 : 0;
+                glDisable(GL_LIGHTING);
+                ambient = 30;
                 float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
+                //float yellow[] = {1.0,1.0,0.0,1.0};
+                //float Direction[] = {Cos(Th)*Sin(Ph),Sin(Th)*Sin(Ph),-Cos(Ph),0};
                 //  Light position
                 float Position[]  = {distance*Cos(zh),ylight,distance*Sin(zh),1.0};
                 //  Draw light position as ball (still no lighting here)
                 //  OpenGL should normalize normal vectors
 
-                if (day) {
-                        glEnable(GL_NORMALIZE);
-                        //  Enable lighting
-                        glEnable(GL_LIGHTING);
-                        glColor3f(1,1,1);
-                        ball(Position[0],Position[1],Position[2], .1);
-                        //  Location of viewer for specular calculations
-                        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
-                        //  glColor sets ambient and diffuse color materials
-                        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-                        glEnable(GL_COLOR_MATERIAL);
-                        //  Enable light 0
-                        glEnable(GL_LIGHT0);
-                        //  Set ambient, diffuse, specular components and position of light 0
-                        glLightfv(GL_LIGHT0,GL_AMBIENT,Ambient);
-                        glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
-                        glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
-                        glLightfv(GL_LIGHT0,GL_POSITION,Position);
-                }
-                else {
-                        glEnable(GL_NORMALIZE);
-                        glEnable(GL_LIGHTING);
-                        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
-                        //  glColor sets ambient and diffuse color materials
-                        glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-                        glEnable(GL_COLOR_MATERIAL);
-                }
-
+                glEnable(GL_NORMALIZE);
+                //  Enable lighting
+                glEnable(GL_LIGHTING);
+                glColor3f(1,1,1);
+                ball(Position[0],Position[1],Position[2], .1);
+                //  Location of viewer for specular calculations
+                glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+                //  glColor sets ambient and diffuse color materials
+                glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+                glEnable(GL_COLOR_MATERIAL);
+                //  Enable light 0
+                glEnable(GL_LIGHT0);
+                //  Set ambient, diffuse, specular components and position of light 0
+                glLightfv(GL_LIGHT0,GL_AMBIENT,Ambient);
+                glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
+                glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+                glLightfv(GL_LIGHT0,GL_POSITION,Position);
         }
-        else
+        else {
                 glDisable(GL_LIGHTING);
+                ambient = 0;
+                float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
+                float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
+                float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
+                float yellow[] = {1.0,1.0,0.0,1.0};
+
+                //  OpenGL should normalize normal vectors
+                glEnable(GL_NORMALIZE);
+                //  Enable lighting
+                glEnable(GL_LIGHTING);
+                //  Location of viewer for specular calculations
+                glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,local);
+                //  Two sided mode
+                glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,side);
+                //  glColor sets ambient and diffuse color materials
+                glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+                glEnable(GL_COLOR_MATERIAL);
+                //  Set specular colors
+                glMaterialfv(GL_FRONT,GL_SPECULAR,yellow);
+                glMaterialf(GL_FRONT,GL_SHININESS,shiny);
+                //Enable light 0
+                glEnable(GL_LIGHT0);
+                //  Set ambient, diffuse, specular components and position of light 0
+                glLightfv(GL_LIGHT0,GL_AMBIENT,Ambient);
+                glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
+                glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+                //  Set spotlight parameters
+                glLightf(GL_LIGHT0,GL_SPOT_CUTOFF,sco);
+                glLightf(GL_LIGHT0,GL_SPOT_EXPONENT,Exp);
+                //  Set attenuation
+                glLightf(GL_LIGHT0,GL_CONSTANT_ATTENUATION,at0/100.0);
+                glLightf(GL_LIGHT0,GL_LINEAR_ATTENUATION,at1/100.0);
+                glLightf(GL_LIGHT0,GL_QUADRATIC_ATTENUATION,at2/100.0);
+        }
+
 
         //  Draw scene
-        ground(2);
+        ground(10);
         for (double i=-15; i<15; i+=3) {
                 for(double j=-15; j<15; j+=3) {
                         if (i || j !=0)
