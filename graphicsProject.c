@@ -37,7 +37,7 @@ int fov=55;       //  Field of view (for perspective)
 int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
 double dim=10.0;   //  Size of world
-int num = 4;
+int num = 10;
 int fpv = 1;
 int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
@@ -118,24 +118,10 @@ static void ball(double x,double y,double z,double r)
         glPopMatrix();
 }
 
-/*
- *  Draw in positive y axis, vertex in polar coordinates with normal
- */
-// static void DVertex(double th,double ph)
-// {
-//         double x = Sin(th)*Cos(ph);
-//         double y = Cos(th)*Cos(ph);
-//         double z =         Sin(ph);
-//         //  For a sphere at the origin, the position
-//         //  and normal vectors are the same
-//         glNormal3d(x,fabs(y),z);
-//         glVertex3d(x,fabs(y),z);
+// static void flashlight(double x, double y, double z){
+//
 // }
 
-/*
- * Draw a tree conisiting of a brown base and green sphere
- * Base code for cylinder is modified from GitHub users: nikAizuddin
- */
 static void ground(double r){
 
         double mul = 2.0/num;
@@ -266,8 +252,8 @@ void display()
         if (fpv) {
                 ph = 0;
                 th = 0;
-                Lx = 10*Sin(l);
-                Lz = 10*Cos(l);
+                Lx = 100*Sin(l);
+                Lz = 100*Cos(l);
                 gluLookAt(Fx,Fy,Fz, Lx,Ly,Lz, 0,1,0); // Look from camera position to a certian direction.
                 glRotatef(ph,1,0,0);
                 glRotatef(th,0,1,0);
@@ -322,12 +308,14 @@ void display()
         }
         else {
                 ambient = 0;
-                sco = 50;
+                sco = 10;
 
                 float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
                 float yellow[] = {1.0,1.0,0.0,1.0};
+                float Direction[] = {Sin(l)/10000,0,Cos(l)/10000};
+
 
                 float Position[]  = {Fx+(Sin(l)*.05),Fy,Fz+(Cos(l)*.05),1.0};
 
@@ -356,6 +344,7 @@ void display()
                 glLightfv(GL_LIGHT0,GL_POSITION,Position);
 
                 //  Set spotlight parameters
+                glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,Direction);
                 glLightf(GL_LIGHT0,GL_SPOT_CUTOFF,sco);
                 glLightf(GL_LIGHT0,GL_SPOT_EXPONENT,Exp);
                 //  Set attenuation
