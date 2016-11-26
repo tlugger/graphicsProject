@@ -28,7 +28,7 @@
 
 int axes=0;       //  Display axes
 //int mode=0;       //  Projection mode
-int day = 0;
+int day = 1;
 int move=1;       //  Move light
 int side=0;       //  Two sided mode
 int th=0;         //  Azimuth of view angle
@@ -37,6 +37,7 @@ int fov=55;       //  Field of view (for perspective)
 int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
 double dim=10.0;   //  Size of world
+int num = 4;
 int fpv = 1;
 int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
@@ -51,13 +52,13 @@ int inc       =  10;  // Ball increment
 int smooth    =   1;  // Smooth/Flat shading
 int local     =   0;  // Local Viewer Model
 int Th=0,Ph=30;   //  Light angles
-float sco=180;    //  Spot cutoff angle
 float Exp=0;      //  Spot exponent
 int at0=100;      //  Constant  attenuation %
 int at1=0;        //  Linear    attenuation %
 int at2=0;        //  Quadratic attenuation %
 int emission  =   0;  // Emission intensity (%)
 int ambient   =  30;
+float sco = 180;    //  Spot cutoff angle
 int diffuse   = 100;  // Diffuse intensity (%)
 int specular  =   0;  // Specular intensity (%)
 int shininess =   0;  // Shininess (power of two)
@@ -136,6 +137,8 @@ static void ball(double x,double y,double z,double r)
  * Base code for cylinder is modified from GitHub users: nikAizuddin
  */
 static void ground(double r){
+
+        double mul = 2.0/num;
         //  Set specular color to white
         float white[] = {1,1,1,1};
         float Emission[]  = {0.0,0.0,0.01*emission,1.0};
@@ -150,24 +153,17 @@ static void ground(double r){
         glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D,texture[0]);
 
+        glColor3f(1.0,1.0,1.0);
+        glNormal3f(0,1,0);
         glBegin(GL_QUADS);
-        glColor3f(1, 1, 1);
-
-        glTexCoord2f(0, 0); glVertex3f(-r, 0, -r);
-        glTexCoord2f(0, rep+r); glVertex3f(-r, 0, r);
-        glTexCoord2f(rep+r, rep+r); glVertex3f(r, 0, r);
-        glTexCoord2f(rep+r, 0); glVertex3f(r, 0, -r);
-
-        // double angle = 0.0;
-        // double angle_stepsize = 0.1;
-        // while( angle < 2*M_PI ) {
-        //         double c = r * cos(angle);
-        //         double s = r * sin(angle);
-        //         glNormal3f(0, 1, 0);
-        //         glTexCoord2f((rep+10)/2*cos(angle)+r, (rep+10)/2*sin(angle)+r); glVertex3f(c, 0, s);
-        //
-        //         angle = angle + angle_stepsize;
-        // }
+        for (int i=0;i<num;i++)
+           for (int j=0;j<num;j++)
+           {
+              glTexCoord2d(mul*(i+0),mul*(j+0)); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+0)-5);
+              glTexCoord2d(mul*(i+1),mul*(j+0)); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+0)-5);
+              glTexCoord2d(mul*(i+1),mul*(j+1)); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+1)-5);
+              glTexCoord2d(mul*(i+0),mul*(j+1)); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+1)-5);
+           }
         glEnd();
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
@@ -258,6 +254,7 @@ static void tree(double x, double z, double radius, double height){
 void display()
 {
         const double len=2.0; //  Length of axes
+
         //  Erase the window and the depth buffer
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         //  Enable Z-buffering in OpenGL
@@ -290,6 +287,8 @@ void display()
         {
                 glDisable(GL_LIGHTING);
                 ambient = 30;
+                sco = 180;
+
                 float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
@@ -317,14 +316,22 @@ void display()
                 glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
                 glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
                 glLightfv(GL_LIGHT0,GL_POSITION,Position);
+
+                glLightf(GL_LIGHT0,GL_SPOT_CUTOFF,sco);
+
         }
         else {
-                glDisable(GL_LIGHTING);
                 ambient = 0;
+                sco = 50;
+
                 float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
                 float yellow[] = {1.0,1.0,0.0,1.0};
+
+                float Position[]  = {(Fx+Sin(l))-.5,Fy,(Fz+Cos(l))-.5,1.0};
+
+                ball(Position[0],Position[1],Position[2] , 0.05);
 
                 //  OpenGL should normalize normal vectors
                 glEnable(GL_NORMALIZE);
@@ -346,6 +353,8 @@ void display()
                 glLightfv(GL_LIGHT0,GL_AMBIENT,Ambient);
                 glLightfv(GL_LIGHT0,GL_DIFFUSE,Diffuse);
                 glLightfv(GL_LIGHT0,GL_SPECULAR,Specular);
+                glLightfv(GL_LIGHT0,GL_POSITION,Position);
+
                 //  Set spotlight parameters
                 glLightf(GL_LIGHT0,GL_SPOT_CUTOFF,sco);
                 glLightf(GL_LIGHT0,GL_SPOT_EXPONENT,Exp);
@@ -358,8 +367,8 @@ void display()
 
         //  Draw scene
         ground(10);
-        for (double i=-15; i<15; i+=3) {
-                for(double j=-15; j<15; j+=3) {
+        for (double i=-50; i<50; i+=5) {
+                for(double j=-50; j<50; j+=5) {
                         if (i || j !=0)
                                 tree(i/10, j/10, .04, .5);
                 }

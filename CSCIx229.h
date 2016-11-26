@@ -29,7 +29,6 @@ void Fatal(const char* format, ...);
 unsigned int LoadTexBMP(const char* file);
 void Project(int fpv,double fov,double asp,double dim);
 void ErrCheck(const char* where);
-int  LoadOBJ(const char* file);
 
 #ifdef __cplusplus
 }
