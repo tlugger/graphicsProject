@@ -314,12 +314,12 @@ void display()
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
                 float yellow[] = {1.0,1.0,0.0,1.0};
-                float Direction[] = {Sin(l)/10000,0,Cos(l)/10000};
+                float Direction[] = {Sin(l),0,Cos(l)};
 
 
-                float Position[]  = {Fx+(Sin(l)*.05),Fy,Fz+(Cos(l)*.05),1.0};
+                float Position[]  = {Fx,Fy,Fz,1.0};
 
-                ball(Position[0],Position[1],Position[2] , 0.001);
+                //ball(Position[0],Position[1],Position[2] , 0.001);
 
                 //  OpenGL should normalize normal vectors
                 glEnable(GL_NORMALIZE);
