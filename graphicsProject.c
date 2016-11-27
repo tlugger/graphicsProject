@@ -37,7 +37,7 @@ int fov=55;       //  Field of view (for perspective)
 int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
 double dim=10.0;   //  Size of world
-int num = 10;
+int num = 500; // Draw a ton of squares to make up the ground so the flashlight looks real
 int fpv = 1;
 int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
@@ -66,7 +66,7 @@ float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   1.0;  // Elevation of light
 int rep       =   1;
-unsigned int texture[3];
+unsigned int texture[4];
 
 /*
  *  Draw vertex in polar coordinates with normal
@@ -118,8 +118,44 @@ static void ball(double x,double y,double z,double r)
         glPopMatrix();
 }
 
-// static void flashlight(double x, double y, double z){
+// static void flashlight(double x, double y, double z, double radius){
 //
+//
+//         //  Save model view matrix and set to indentity
+//       //  glMatrixMode(GL_MODELVIEW);
+//         //  Set specular color to white
+//         float white[] = {1,1,1,1};
+//         float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+//         glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+//         glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+//         glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
+//
+//         glPushMatrix();
+//         glTranslated(x,y,z);
+//
+//         double angle = 0.0;
+//         double angle_stepsize = 0.1;
+//
+//         /** Draw the tube */
+//         //  Enable textures
+//         glEnable(GL_TEXTURE_2D);
+//         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+//         glBindTexture(GL_TEXTURE_2D,texture[3]);
+//
+//         glColor3f(1,1,1);
+//         glBegin(GL_QUAD_STRIP);
+//         angle = 0.0;
+//         while( angle < 2*M_PI+.1 ) {
+//                 double c = radius * cos(angle);
+//                 double s = radius * sin(angle);
+//                 glNormal3f(cos(angle), 0, sin(angle));
+//                 glTexCoord2f((angle / (2*M_PI+.1)), y*5); glVertex3f(c, y, s);
+//                 glTexCoord2f((angle / (2*M_PI+.1)), 0); glVertex3f(c, 0, s);
+//                 angle = angle + angle_stepsize;
+//         }
+//         glEnd();
+//         glPopMatrix();
+//         glDisable(GL_TEXTURE_2D);
 // }
 
 static void ground(double r){
@@ -142,14 +178,14 @@ static void ground(double r){
         glColor3f(1.0,1.0,1.0);
         glNormal3f(0,1,0);
         glBegin(GL_QUADS);
-        for (int i=0;i<num;i++)
-           for (int j=0;j<num;j++)
-           {
-              glTexCoord2d(mul*(i+0),mul*(j+0)); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+0)-5);
-              glTexCoord2d(mul*(i+1),mul*(j+0)); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+0)-5);
-              glTexCoord2d(mul*(i+1),mul*(j+1)); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+1)-5);
-              glTexCoord2d(mul*(i+0),mul*(j+1)); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+1)-5);
-           }
+        for (int i=0; i<num; i++)
+                for (int j=0; j<num; j++)
+                {
+                        glTexCoord2d(mul*(i+0)*8,mul*(j+0)*8); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+0)-5);
+                        glTexCoord2d(mul*(i+1)*8,mul*(j+0)*8); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+0)-5);
+                        glTexCoord2d(mul*(i+1)*8,mul*(j+1)*8); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+1)-5);
+                        glTexCoord2d(mul*(i+0)*8,mul*(j+1)*8); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+1)-5);
+                }
         glEnd();
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
@@ -182,8 +218,8 @@ static void tree(double x, double z, double radius, double height){
                 double c = radius * cos(angle);
                 double s = radius * sin(angle);
                 glNormal3f(cos(angle), 0, sin(angle));
-                glTexCoord2f((height*c)*(10*rep), (height*s)*(10*rep)); glVertex3f(c, height, s);
-                glTexCoord2f(c*(10*rep), s*(10*rep)); glVertex3f(c, 0.0, s);
+                glTexCoord2f((angle / (2*M_PI+.1)), 1); glVertex3f(c, height, s);
+                glTexCoord2f((angle / (2*M_PI+.1)), 0); glVertex3f(c, 0.0, s);
                 angle = angle + angle_stepsize;
         }
         glEnd();
@@ -226,13 +262,6 @@ static void tree(double x, double z, double radius, double height){
         glDisable(GL_TEXTURE_2D);
 
 }
-
-/*
- * Function to draw a flashlight
- */
-/*static void flashlight(){
-
-}*/
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -314,12 +343,11 @@ void display()
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
                 float yellow[] = {1.0,1.0,0.0,1.0};
-                float Direction[] = {Sin(l),0,Cos(l)};
+                float Direction[] = {Sin(l),Ly/100,Cos(l)};
 
 
-                float Position[]  = {Fx,Fy,Fz,1.0};
+                float Position[]  = {Fx + .5*Sin(l),Fy,Fz + .5*Cos(l),1.0};
 
-                //ball(Position[0],Position[1],Position[2] , 0.001);
 
                 //  OpenGL should normalize normal vectors
                 glEnable(GL_NORMALIZE);
@@ -590,9 +618,10 @@ int main(int argc,char* argv[])
         glutKeyboardFunc(key);
         glutIdleFunc(idle);
         //  Load textures
-        texture[0] = LoadTexBMP("grass.bmp");
+        texture[0] = LoadTexBMP("ground.bmp");
         texture[1] = LoadTexBMP("bark.bmp");
         texture[2] = LoadTexBMP("leaves.bmp");
+        texture[3] = LoadTexBMP("flashlight.bmp");
         //  Pass control to GLUT so it can interact with the user
         ErrCheck("init");
         glutMainLoop();
