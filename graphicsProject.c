@@ -398,7 +398,7 @@ void display()
         }
         else {
                 ambient = 0;
-                sco = 10;
+                sco = 15;
 
                 float Ambient[]   = {0.01*ambient,0.01*ambient,0.01*ambient,1.0};
                 float Diffuse[]   = {0.01*diffuse,0.01*diffuse,0.01*diffuse,1.0};
@@ -407,7 +407,7 @@ void display()
                 float Direction[] = {Sin(l),Ly/100,Cos(l)};
 
 
-                float Position[]  = {Fx + .5*Sin(l),Fy,Fz + .5*Cos(l),1.0};
+                float Position[]  = {Fx,Fy,Fz,1.0};
 
 
                 //  OpenGL should normalize normal vectors
@@ -452,7 +452,7 @@ void display()
                 }
         }
 
-        Sky(3.5*3.0);
+        Sky(5);
 
         //  Draw axes - no lighting from here on
         glDisable(GL_LIGHTING);
@@ -522,7 +522,6 @@ void special(int key,int x,int y)
                 }
                 //  Up arrow key - increase camera posoition and posotion of what camera looks at
                 else if (key == GLUT_KEY_UP) {
-                        // Define forward for each of the possible 8 view angles
                         Fx += .05*Sin(l);
                         Fz += .05*Cos(l);
                         Lx += .05*Sin(l);
@@ -685,10 +684,10 @@ int main(int argc,char* argv[])
         texture[2] = LoadTexBMP("leaves.bmp");
         texture[3] = LoadTexBMP("flashlight.bmp");
 
-        sky[0] = LoadTexBMP("negx.bmp");
-        sky[1] = LoadTexBMP("posz.bmp");
-        sky[2] = LoadTexBMP("posx.bmp");
-        sky[3] = LoadTexBMP("negz.bmp");
+        sky[0] = LoadTexBMP("negz.bmp");
+        sky[1] = LoadTexBMP("negx.bmp");
+        sky[2] = LoadTexBMP("posz.bmp");
+        sky[3] = LoadTexBMP("posx.bmp");
         sky[4] = LoadTexBMP("posy.bmp");
         sky[5] = LoadTexBMP("negy.bmp");
         //  Pass control to GLUT so it can interact with the user
