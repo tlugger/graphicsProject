@@ -66,6 +66,7 @@ float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
 float ylight  =   1.0;  // Elevation of light
 int rep       =   1;
+int sky[6];
 unsigned int texture[4];
 
 /*
@@ -264,6 +265,66 @@ static void tree(double x, double z, double radius, double height){
 }
 
 /*
+ *  Draw sky box
+ */
+static void Sky(double D)
+{
+   glColor3f(1,1,1);
+   glEnable(GL_TEXTURE_2D);
+
+   //  Sides
+   glBindTexture(GL_TEXTURE_2D,sky[0]);
+   glBegin(GL_QUADS);
+   glTexCoord2f(0,0); glVertex3f(-D,-D,-D);
+   glTexCoord2f(1,0); glVertex3f(+D,-D,-D);
+   glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
+   glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,sky[1]);
+   glBegin(GL_QUADS);
+   glTexCoord2f(0,0); glVertex3f(+D,-D,-D);
+   glTexCoord2f(1,0); glVertex3f(+D,-D,+D);
+   glTexCoord2f(1,1); glVertex3f(+D,+D,+D);
+   glTexCoord2f(0,1); glVertex3f(+D,+D,-D);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,sky[2]);
+   glBegin(GL_QUADS);
+   glTexCoord2f(0,0); glVertex3f(+D,-D,+D);
+   glTexCoord2f(1,0); glVertex3f(-D,-D,+D);
+   glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
+   glTexCoord2f(0,1); glVertex3f(+D,+D,+D);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,sky[3]);
+   glBegin(GL_QUADS);
+   glTexCoord2f(0,0); glVertex3f(-D,-D,+D);
+   glTexCoord2f(1,0); glVertex3f(-D,-D,-D);
+   glTexCoord2f(1,1); glVertex3f(-D,+D,-D);
+   glTexCoord2f(0,1); glVertex3f(-D,+D,+D);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,sky[4]);
+   glBegin(GL_QUADS);
+   glTexCoord2f(0,0); glVertex3f(+D,+D,-D);
+   glTexCoord2f(1,0); glVertex3f(+D,+D,+D);
+   glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
+   glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
+   glEnd();
+
+   glBindTexture(GL_TEXTURE_2D,sky[5]);
+   glBegin(GL_QUADS);
+   glTexCoord2f(1,1); glVertex3f(-D,-D,+D);
+   glTexCoord2f(0,1); glVertex3f(+D,-D,+D);
+   glTexCoord2f(0,0); glVertex3f(+D,-D,-D);
+   glTexCoord2f(1,0); glVertex3f(-D,-D,-D);
+   glEnd();
+
+   glDisable(GL_TEXTURE_2D);
+}
+
+/*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
 void display()
@@ -384,13 +445,14 @@ void display()
 
         //  Draw scene
         ground(10);
-        for (double i=-50; i<50; i+=5) {
-                for(double j=-50; j<50; j+=5) {
+        for (double i=-40; i<40; i+=5) {
+                for(double j=-40; j<40; j+=5) {
                         if (i || j !=0)
                                 tree(i/10, j/10, .04, .5);
                 }
         }
 
+        Sky(3.5*3.0);
 
         //  Draw axes - no lighting from here on
         glDisable(GL_LIGHTING);
@@ -568,9 +630,9 @@ void key(unsigned char ch,int x,int y)
         else if (ch == 'd')
                 day = 1-day;
         else if (ch == 'w')
-                Ly += .5;
+                Ly += 2;
         else if (ch == 's')
-                Ly -= .5;
+                Ly -= 2;
         if (rep<1) rep = 1;
 
         //  Reproject
@@ -622,6 +684,13 @@ int main(int argc,char* argv[])
         texture[1] = LoadTexBMP("bark.bmp");
         texture[2] = LoadTexBMP("leaves.bmp");
         texture[3] = LoadTexBMP("flashlight.bmp");
+
+        sky[0] = LoadTexBMP("negx.bmp");
+        sky[1] = LoadTexBMP("posz.bmp");
+        sky[2] = LoadTexBMP("posx.bmp");
+        sky[3] = LoadTexBMP("negz.bmp");
+        sky[4] = LoadTexBMP("posy.bmp");
+        sky[5] = LoadTexBMP("negy.bmp");
         //  Pass control to GLUT so it can interact with the user
         ErrCheck("init");
         glutMainLoop();
