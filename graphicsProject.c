@@ -64,10 +64,19 @@ int specular  =   0;  // Specular intensity (%)
 int shininess =   0;  // Shininess (power of two)
 float shiny   =   1;  // Shininess (value)
 int zh        =  90;  // Light azimuth
-float ylight  =   1.0;  // Elevation of light
+float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
 unsigned int texture[4];
+
+double Heights[324];
+
+static void fillHeights(){
+  for (int k = 0; k < 324; k++){
+    Heights[k] = abs(rand() % 2)+1;
+  }
+}
+
 
 /*
  *  Draw vertex in polar coordinates with normal
@@ -214,53 +223,56 @@ static void tree(double x, double z, double radius, double height){
 
         glColor3f(1,1,1);
         glBegin(GL_QUAD_STRIP);
-        angle = 0.0;
+        //angle = 0.0;
         while( angle < 2*M_PI+.1 ) {
                 double c = radius * cos(angle);
                 double s = radius * sin(angle);
+                double c2 = radius/8 * cos(angle);
+                double s2 = radius/8 * sin(angle);
                 glNormal3f(cos(angle), 0, sin(angle));
-                glTexCoord2f((angle / (2*M_PI+.1)), 1); glVertex3f(c, height, s);
+                glTexCoord2f((angle / (2*M_PI+.1)), 1); glVertex3f(c2, height, s2);
                 glTexCoord2f((angle / (2*M_PI+.1)), 0); glVertex3f(c, 0.0, s);
                 angle = angle + angle_stepsize;
         }
+
         glEnd();
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
 
-        // Draw sphere on top of cylinder
-        glPushMatrix();
-        glTranslated(x,height,z);
-        glScaled(4*radius,4*radius,4*radius);
-
-        //  Enable textures
-        glEnable(GL_TEXTURE_2D);
-        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        glBindTexture(GL_TEXTURE_2D,texture[2]);
-
-        const double d = 5;
-        glBegin(GL_TRIANGLE_FAN);
-        Vertex(0,-90);
-        for (int th=0; th<=360; th+=d)
-        {
-                Vertex(th,d-90);
-        }
-        glEnd();
-
-        //  Latitude bands
-        for ( int ph=d-90; ph<=90-2*d; ph+=d)
-        {
-                glBegin(GL_QUAD_STRIP);
-                for (int th=0; th<=360; th+=d)
-                {
-                        glTexCoord2f(th, ph); Vertex(th,ph);
-                        glTexCoord2f(th, ph+d); Vertex(th,ph+d);
-                }
-                glEnd();
-
-
-        }
-        glPopMatrix();
-        glDisable(GL_TEXTURE_2D);
+        // // Draw sphere on top of cylinder
+        // glPushMatrix();
+        // glTranslated(x,height,z);
+        // glScaled(4*radius,4*radius,4*radius);
+        //
+        // //  Enable textures
+        // glEnable(GL_TEXTURE_2D);
+        // glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        // glBindTexture(GL_TEXTURE_2D,texture[2]);
+        //
+        // const double d = 5;
+        // glBegin(GL_TRIANGLE_FAN);
+        // Vertex(0,-90);
+        // for (int th=0; th<=360; th+=d)
+        // {
+        //         Vertex(th,d-90);
+        // }
+        // glEnd();
+        //
+        // //  Latitude bands
+        // for ( int ph=d-90; ph<=90-2*d; ph+=d)
+        // {
+        //         glBegin(GL_QUAD_STRIP);
+        //         for (int th=0; th<=360; th+=d)
+        //         {
+        //                 glTexCoord2f(th, ph); Vertex(th,ph);
+        //                 glTexCoord2f(th, ph+d); Vertex(th,ph+d);
+        //         }
+        //         glEnd();
+        //
+        //
+        // }
+        // glPopMatrix();
+        // glDisable(GL_TEXTURE_2D);
 
 }
 
@@ -269,60 +281,61 @@ static void tree(double x, double z, double radius, double height){
  */
 static void Sky(double D)
 {
-   glColor3f(1,1,1);
-   glEnable(GL_TEXTURE_2D);
+        glColor3f(1,1,1);
+        glEnable(GL_TEXTURE_2D);
 
-   //  Sides
-   glBindTexture(GL_TEXTURE_2D,sky[0]);
-   glBegin(GL_QUADS);
-   glTexCoord2f(0,0); glVertex3f(-D,-D,-D);
-   glTexCoord2f(1,0); glVertex3f(+D,-D,-D);
-   glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
-   glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
-   glEnd();
+        //  Sides
+        glBindTexture(GL_TEXTURE_2D,sky[0]);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0,0); glVertex3f(-D,-D,-D);
+        glTexCoord2f(1,0); glVertex3f(+D,-D,-D);
+        glTexCoord2f(1,1); glVertex3f(+D,+D,-D);
+        glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
+        glEnd();
 
-   glBindTexture(GL_TEXTURE_2D,sky[1]);
-   glBegin(GL_QUADS);
-   glTexCoord2f(0,0); glVertex3f(+D,-D,-D);
-   glTexCoord2f(1,0); glVertex3f(+D,-D,+D);
-   glTexCoord2f(1,1); glVertex3f(+D,+D,+D);
-   glTexCoord2f(0,1); glVertex3f(+D,+D,-D);
-   glEnd();
+        glBindTexture(GL_TEXTURE_2D,sky[1]);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0,0); glVertex3f(+D,-D,-D);
+        glTexCoord2f(1,0); glVertex3f(+D,-D,+D);
+        glTexCoord2f(1,1); glVertex3f(+D,+D,+D);
+        glTexCoord2f(0,1); glVertex3f(+D,+D,-D);
+        glEnd();
 
-   glBindTexture(GL_TEXTURE_2D,sky[2]);
-   glBegin(GL_QUADS);
-   glTexCoord2f(0,0); glVertex3f(+D,-D,+D);
-   glTexCoord2f(1,0); glVertex3f(-D,-D,+D);
-   glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
-   glTexCoord2f(0,1); glVertex3f(+D,+D,+D);
-   glEnd();
+        glBindTexture(GL_TEXTURE_2D,sky[2]);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0,0); glVertex3f(+D,-D,+D);
+        glTexCoord2f(1,0); glVertex3f(-D,-D,+D);
+        glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
+        glTexCoord2f(0,1); glVertex3f(+D,+D,+D);
+        glEnd();
 
-   glBindTexture(GL_TEXTURE_2D,sky[3]);
-   glBegin(GL_QUADS);
-   glTexCoord2f(0,0); glVertex3f(-D,-D,+D);
-   glTexCoord2f(1,0); glVertex3f(-D,-D,-D);
-   glTexCoord2f(1,1); glVertex3f(-D,+D,-D);
-   glTexCoord2f(0,1); glVertex3f(-D,+D,+D);
-   glEnd();
+        glBindTexture(GL_TEXTURE_2D,sky[3]);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0,0); glVertex3f(-D,-D,+D);
+        glTexCoord2f(1,0); glVertex3f(-D,-D,-D);
+        glTexCoord2f(1,1); glVertex3f(-D,+D,-D);
+        glTexCoord2f(0,1); glVertex3f(-D,+D,+D);
+        glEnd();
 
-   glBindTexture(GL_TEXTURE_2D,sky[4]);
-   glBegin(GL_QUADS);
-   glTexCoord2f(0,0); glVertex3f(+D,+D,-D);
-   glTexCoord2f(1,0); glVertex3f(+D,+D,+D);
-   glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
-   glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
-   glEnd();
+        glBindTexture(GL_TEXTURE_2D,sky[4]);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0,0); glVertex3f(+D,+D,-D);
+        glTexCoord2f(1,0); glVertex3f(+D,+D,+D);
+        glTexCoord2f(1,1); glVertex3f(-D,+D,+D);
+        glTexCoord2f(0,1); glVertex3f(-D,+D,-D);
+        glEnd();
 
-   glBindTexture(GL_TEXTURE_2D,sky[5]);
-   glBegin(GL_QUADS);
-   glTexCoord2f(1,1); glVertex3f(-D,-D,+D);
-   glTexCoord2f(0,1); glVertex3f(+D,-D,+D);
-   glTexCoord2f(0,0); glVertex3f(+D,-D,-D);
-   glTexCoord2f(1,0); glVertex3f(-D,-D,-D);
-   glEnd();
+        glBindTexture(GL_TEXTURE_2D,sky[5]);
+        glBegin(GL_QUADS);
+        glTexCoord2f(1,1); glVertex3f(-D,-D,+D);
+        glTexCoord2f(0,1); glVertex3f(+D,-D,+D);
+        glTexCoord2f(0,0); glVertex3f(+D,-D,-D);
+        glTexCoord2f(1,0); glVertex3f(-D,-D,-D);
+        glEnd();
 
-   glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_2D);
 }
+
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -442,10 +455,12 @@ void display()
 
         //  Draw scene
         ground(10);
-        for (double i=-40; i<40; i+=5) {
-                for(double j=-40; j<40; j+=5) {
-                        if (i || j !=0)
-                                tree(i/10, j/10, .04, .5);
+        int randSize;
+        for (double i=0; i<90; i+=5) {
+                for(double j=0; j<90; j+=5) {
+                        if (i != 45 && j != 45)
+                                randSize = (int)(((i/10)*2)*((j/10)*2));
+                                tree((i-45)/10, (j-45)/10, (.02 * Heights[randSize]), Heights[randSize]);
                 }
         }
 
@@ -663,6 +678,8 @@ void reshape(int width,int height)
  */
 int main(int argc,char* argv[])
 {
+        fillHeights();
+
         //  Initialize GLUT
         glutInit(&argc,argv);
         //  Request double buffered, true color window with Z buffering at 600x600
