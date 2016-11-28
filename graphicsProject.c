@@ -405,8 +405,6 @@ void display()
                 float Specular[]  = {0.01*specular,0.01*specular,0.01*specular,1.0};
                 float yellow[] = {1.0,1.0,0.0,1.0};
                 float Direction[] = {Sin(l),Ly/100,Cos(l)};
-
-
                 float Position[]  = {Fx,Fy,Fz,1.0};
 
 
@@ -442,7 +440,6 @@ void display()
                 glLightf(GL_LIGHT0,GL_QUADRATIC_ATTENUATION,at2/100.0);
         }
 
-
         //  Draw scene
         ground(10);
         for (double i=-40; i<40; i+=5) {
@@ -452,7 +449,7 @@ void display()
                 }
         }
 
-        Sky(5);
+        if (fpv) Sky(5);
 
         //  Draw axes - no lighting from here on
         glDisable(GL_LIGHTING);
