@@ -25,6 +25,10 @@
  *  ESC        Exit
  */
 #include "CSCIx229.h"
+#include <time.h>
+
+//srand(time(NULL));
+
 
 int axes=0;       //  Display axes
 //int mode=0;       //  Projection mode
@@ -68,15 +72,15 @@ float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
 unsigned int texture[4];
-
+double targetPos[2];
 double Heights[324];
 
 static void fillHeights(){
         for (int k = 0; k < 324; k++) {
                 Heights[k] = abs(rand() % 2)+0.5;
         }
-}
 
+}
 
 /*
  *  Draw vertex in polar coordinates with normal
@@ -92,6 +96,17 @@ static void Vertex(double th,double ph)
         glVertex3d(x,y,z);
 }
 
+
+static void DVertex(double th,double ph)
+{
+        double x = Sin(th)*Cos(ph);
+        double y = Cos(th)*Cos(ph);
+        double z =         Sin(ph);
+        //  For a sphere at the origin, the position
+        //  and normal vectors are the same
+        glNormal3d(x,fabs(y),z);
+        glVertex3d(x,fabs(y),z);
+}
 
 /*
  *  Draw a ball
@@ -146,8 +161,6 @@ static void ground(double r){
         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
         glColor3f(1,1,1);
         glBindTexture(GL_TEXTURE_2D,texture[0]);
-
-        glColor3f(1.0,1.0,1.0);
         glNormal3f(0,1,0);
         glBegin(GL_QUADS);
         for (int i=0; i<num; i++)
@@ -298,6 +311,30 @@ static void Sky(double D)
         glDisable(GL_TEXTURE_2D);
 }
 
+static void target(double x, double z, double r){
+        float white[] = {1,1,1,1};
+        float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+        glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
+
+        glPushMatrix();
+        glTranslated(x, .03, z);
+        glScaled(r,r*4,r); // Make half dome
+        // Draw dome on top of nose cone
+        int theta, phi;
+        glColor3f(1,1,1);
+        for (phi=0; phi<360; phi+=inc) {
+                glBegin(GL_QUAD_STRIP);
+                for (theta=0; theta<=90; theta+=inc) {
+                        DVertex(theta,phi);
+                        DVertex(theta,phi+inc);
+                }
+                glEnd();
+        }
+        glPopMatrix();
+}
+
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -422,10 +459,19 @@ void display()
                 for(double j=0; j<90; j+=5) {
                         if (i != 45 || j != 45) {
                                 randSize = (int)(((i/10)*2)*((j/10)*2));
-                                tree((i-45)/10, (j-45)/10, (.02 * Heights[randSize]), Heights[randSize]);
+                                tree((i-45)/10, (j-45)/10, (.03 * Heights[randSize]), Heights[randSize]);
                         }
                 }
         }
+
+        target(targetPos[0], targetPos[1], .03);
+
+        glWindowPos2i(0, 575);
+        if(fabs(Fx-targetPos[0]) < .1 && fabs(Fz-targetPos[1]) < .1){
+          Print("You Win!");
+        }
+        else
+          Print("Find the ghost");
 
         if (fpv) Sky(5);
 
@@ -641,8 +687,10 @@ void reshape(int width,int height)
  */
 int main(int argc,char* argv[])
 {
+        srand(time(NULL));
+        targetPos[0] = rand() % 5 + .25;
+        targetPos[1] = rand() % 5 + .25;
         fillHeights();
-
         //  Initialize GLUT
         glutInit(&argc,argv);
         //  Request double buffered, true color window with Z buffering at 600x600
@@ -660,7 +708,7 @@ int main(int argc,char* argv[])
         texture[1] = LoadTexBMP("bark.bmp");
         texture[2] = LoadTexBMP("leaves.bmp");
         texture[3] = LoadTexBMP("flashlight.bmp");
-
+        // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
         sky[1] = LoadTexBMP("negx.bmp");
         sky[2] = LoadTexBMP("posz.bmp");
