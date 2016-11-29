@@ -1,14 +1,13 @@
 #Computer Graphics Final Project
 
-
-######This Project creates a scene in two different modes that allows navigation infirst person view around a natural scene to find a ghost.
-
-
-######The two unique modes for this scene are:
-Day Mode: Navigating through the scene with full light and a moving sun.
-Night Mode: Navigating through the scene with minimal ambient light and a flashlight shining directly in front of the view
-
 ###Tyler Lugger
+
+####This Project creates a scene in two different modes that allows navigation infirst person view around a natural scene to find a ghost.
+
+
+####The two unique modes for this scene are:
+* Day Mode: Navigating through the scene with full light and a moving sun.
+* Night Mode: Navigating through the scene with minimal ambient light and a flashlight shining directly in front of the view
 
 ######Key bindings:
 *  d          Toggles day/night mode
