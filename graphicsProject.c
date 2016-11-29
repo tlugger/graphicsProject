@@ -4,24 +4,20 @@
  *
  *  Key bindings:
  *  d          Toggles day/night mode
+ *  f          Toggles fpv/perspective views
  *  w          Increases camera view angle
  *  s          Decreases camera view angle
  *  l          Toggles lighting
- *  r/R        Decrease/increase repetition of texture
  *  a/A        Decrease/increase ambient light
  *  F1         Toggle smooth/flat shading
  *  F2         Toggle local viewer mode
  *  F3         Toggle light distance (1/5)
  *  F8         Change ball increment
- *  F9         Invert bottom normal
  *  m          Toggles light movement
  *  []         Lower/rise light
- *  p          Toggles ortogonal/perspective projection
- *  +/-        Change field of view of perspective
  *  x          Toggle axes
- *  arrows     Change view angle
+ *  arrows     look left/right, move forward/backward
  *  PgDn/PgUp  Zoom in and out
- *  0          Reset view angle
  *  ESC        Exit
  */
 #include "CSCIx229.h"
