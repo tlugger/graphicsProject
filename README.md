@@ -11,9 +11,10 @@
 
 ######Key bindings:
 *  d          Toggles day/night mode
-*  f          Toggles fpv/perspective views
+*  arrows     look left/right, move forward/backward
 *  w          Increases camera view angle
 *  s          Decreases camera view angle
+*  f          Toggles fpv/perspective views
 *  l          Toggles lighting
 *  a/A        Decrease/increase ambient light
 *  F1         Toggle smooth/flat shading
@@ -23,6 +24,5 @@
 *  m          Toggles light movement
 *  []         Lower/rise light
 *  x          Toggle axes
-*  arrows     look left/right, move forward/backward
 *  PgDn/PgUp  Zoom in and out
 *  ESC        Exit
