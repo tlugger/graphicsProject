@@ -2,7 +2,9 @@
 
 ###Tyler Lugger
 
-####This Project creates a scene in two different modes that allows navigation infirst person view around a natural scene to find a ghost.
+####This Project creates a scene in two different modes that allows navigation in first person view around a natural scene to find a ghost.
+
+####The scene opens in a forested area in day mode. A ghost is placed randomly within the world, either out in the open or partially within a tree (it is a ghost after all). Use the arrow keys to navigate around the world and find the ghost. When you are close enough to the ghost, a message will display at the top left of the window telling you that you won the hunt. Use the 'd' key to switch to night mode for a more challenging ghost hunt. 
 
 
 ####The two unique modes for this scene are:
@@ -14,7 +16,7 @@
 *  arrows     look left/right, move forward/backward
 *  w          Increases camera view angle
 *  s          Decreases camera view angle
-*  f          Toggles fpv/perspective views
+*  f          Toggles FPV/perspective views
 *  l          Toggles lighting
 *  a/A        Decrease/increase ambient light
 *  F1         Toggle smooth/flat shading

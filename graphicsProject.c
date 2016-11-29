@@ -23,12 +23,9 @@
 #include "CSCIx229.h"
 #include <time.h>
 
-//srand(time(NULL));
-
-
+// Globals
 int axes=0;       //  Display axes
-//int mode=0;       //  Projection mode
-int day = 1;
+int day = 1;      //  Day/Night mode
 int move=1;       //  Move light
 int side=0;       //  Two sided mode
 int th=0;         //  Azimuth of view angle
@@ -38,7 +35,7 @@ int light=1;      //  Lighting
 double asp=1;     //  Aspect ratio
 double dim=10.0;   //  Size of world
 int num = 500; // Draw a ton of squares to make up the ground so the flashlight looks real
-int fpv = 1;
+int fpv = 1; // FPV mode
 int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
 double Fy = 0.05; // Global variable for camera y pos
@@ -317,9 +314,12 @@ static void target(double x, double z, double r){
         glPushMatrix();
         glTranslated(x, .03, z);
         glScaled(r,r*4,r); // Make half dome
+        glColor4f(1,1,1,0.01*75);
+        //  Enable blending
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
         // Draw dome on top of nose cone
         int theta, phi;
-        glColor3f(1,1,1);
         for (phi=0; phi<360; phi+=inc) {
                 glBegin(GL_QUAD_STRIP);
                 for (theta=0; theta<=90; theta+=inc) {
@@ -328,6 +328,7 @@ static void target(double x, double z, double r){
                 }
                 glEnd();
         }
+        glDisable(GL_BLEND);
         glPopMatrix();
 }
 
@@ -463,11 +464,11 @@ void display()
         target(targetPos[0], targetPos[1], .03);
 
         glWindowPos2i(0, 575);
-        if(fabs(Fx-targetPos[0]) < .1 && fabs(Fz-targetPos[1]) < .1){
-          Print("You Win!");
+        if(fabs(Fx-targetPos[0]) < .1 && fabs(Fz-targetPos[1]) < .1) {
+                Print("You Win!");
         }
         else
-          Print("Find the ghost");
+                Print("Find the ghost");
 
         if (fpv) Sky(5);
 
