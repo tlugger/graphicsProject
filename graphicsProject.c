@@ -72,9 +72,9 @@ unsigned int texture[4];
 double Heights[324];
 
 static void fillHeights(){
-  for (int k = 0; k < 324; k++){
-    Heights[k] = abs(rand() % 2)+1;
-  }
+        for (int k = 0; k < 324; k++) {
+                Heights[k] = abs(rand() % 2)+0.5;
+        }
 }
 
 
@@ -128,45 +128,7 @@ static void ball(double x,double y,double z,double r)
         glPopMatrix();
 }
 
-// static void flashlight(double x, double y, double z, double radius){
-//
-//
-//         //  Save model view matrix and set to indentity
-//       //  glMatrixMode(GL_MODELVIEW);
-//         //  Set specular color to white
-//         float white[] = {1,1,1,1};
-//         float Emission[]  = {0.0,0.0,0.01*emission,1.0};
-//         glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
-//         glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
-//         glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
-//
-//         glPushMatrix();
-//         glTranslated(x,y,z);
-//
-//         double angle = 0.0;
-//         double angle_stepsize = 0.1;
-//
-//         /** Draw the tube */
-//         //  Enable textures
-//         glEnable(GL_TEXTURE_2D);
-//         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-//         glBindTexture(GL_TEXTURE_2D,texture[3]);
-//
-//         glColor3f(1,1,1);
-//         glBegin(GL_QUAD_STRIP);
-//         angle = 0.0;
-//         while( angle < 2*M_PI+.1 ) {
-//                 double c = radius * cos(angle);
-//                 double s = radius * sin(angle);
-//                 glNormal3f(cos(angle), 0, sin(angle));
-//                 glTexCoord2f((angle / (2*M_PI+.1)), y*5); glVertex3f(c, y, s);
-//                 glTexCoord2f((angle / (2*M_PI+.1)), 0); glVertex3f(c, 0, s);
-//                 angle = angle + angle_stepsize;
-//         }
-//         glEnd();
-//         glPopMatrix();
-//         glDisable(GL_TEXTURE_2D);
-// }
+
 
 static void ground(double r){
 
@@ -191,10 +153,10 @@ static void ground(double r){
         for (int i=0; i<num; i++)
                 for (int j=0; j<num; j++)
                 {
-                        glTexCoord2d(mul*(i+0)*8,mul*(j+0)*8); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+0)-5);
-                        glTexCoord2d(mul*(i+1)*8,mul*(j+0)*8); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+0)-5);
-                        glTexCoord2d(mul*(i+1)*8,mul*(j+1)*8); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+1)-5);
-                        glTexCoord2d(mul*(i+0)*8,mul*(j+1)*8); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+1)-5);
+                        glTexCoord2d(mul*(i+0)*10,mul*(j+0)*10); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+0)-5);
+                        glTexCoord2d(mul*(i+1)*10,mul*(j+0)*10); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+0)-5);
+                        glTexCoord2d(mul*(i+1)*10,mul*(j+1)*10); glVertex3f(5*mul*(i+1)-5,0,5*mul*(j+1)-5);
+                        glTexCoord2d(mul*(i+0)*10,mul*(j+1)*10); glVertex3f(5*mul*(i+0)-5,0,5*mul*(j+1)-5);
                 }
         glEnd();
         glPopMatrix();
@@ -239,40 +201,40 @@ static void tree(double x, double z, double radius, double height){
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
 
-        // // Draw sphere on top of cylinder
-        // glPushMatrix();
-        // glTranslated(x,height,z);
-        // glScaled(4*radius,4*radius,4*radius);
-        //
-        // //  Enable textures
-        // glEnable(GL_TEXTURE_2D);
-        // glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
-        // glBindTexture(GL_TEXTURE_2D,texture[2]);
-        //
-        // const double d = 5;
-        // glBegin(GL_TRIANGLE_FAN);
-        // Vertex(0,-90);
-        // for (int th=0; th<=360; th+=d)
-        // {
-        //         Vertex(th,d-90);
-        // }
-        // glEnd();
-        //
-        // //  Latitude bands
-        // for ( int ph=d-90; ph<=90-2*d; ph+=d)
-        // {
-        //         glBegin(GL_QUAD_STRIP);
-        //         for (int th=0; th<=360; th+=d)
-        //         {
-        //                 glTexCoord2f(th, ph); Vertex(th,ph);
-        //                 glTexCoord2f(th, ph+d); Vertex(th,ph+d);
-        //         }
-        //         glEnd();
-        //
-        //
-        // }
-        // glPopMatrix();
-        // glDisable(GL_TEXTURE_2D);
+        // Draw sphere on top of cylinder
+        glPushMatrix();
+        glTranslated(x,height,z);
+        glScaled(4*radius,4*radius,4*radius);
+
+        //  Enable textures
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[2]);
+
+        const double d = 5;
+        glBegin(GL_TRIANGLE_FAN);
+        Vertex(0,-90);
+        for (int th=0; th<=360; th+=d)
+        {
+                Vertex(th,d-90);
+        }
+        glEnd();
+
+        //  Latitude bands
+        for ( int ph=d-90; ph<=90-2*d; ph+=d)
+        {
+                glBegin(GL_QUAD_STRIP);
+                for (int th=0; th<=360; th+=d)
+                {
+                        glTexCoord2f(th, ph); Vertex(th,ph);
+                        glTexCoord2f(th, ph+d); Vertex(th,ph+d);
+                }
+                glEnd();
+
+
+        }
+        glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
 
 }
 
@@ -458,9 +420,10 @@ void display()
         int randSize;
         for (double i=0; i<90; i+=5) {
                 for(double j=0; j<90; j+=5) {
-                        if (i != 45 && j != 45)
+                        if (i != 45 || j != 45) {
                                 randSize = (int)(((i/10)*2)*((j/10)*2));
                                 tree((i-45)/10, (j-45)/10, (.02 * Heights[randSize]), Heights[randSize]);
+                        }
                 }
         }
 
