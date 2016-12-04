@@ -360,10 +360,23 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         //  Front
         glColor3f(1, 1, 1);
         glNormal3f(0,0,1);
-        glTexCoord2f(0,0); glVertex3f(-1,0, 1);
+
+        glTexCoord2f(0,.5); glVertex3f(-1,.5, 1);
         glTexCoord2f(0,1); glVertex3f(-1,1, 1);
         glTexCoord2f(1,1); glVertex3f(+1,+1, 1);
+        glTexCoord2f(1,.5); glVertex3f(1,.5, 1);
+
+        glTexCoord2f(0,0); glVertex3f(-1,0, 1);
+        glTexCoord2f(0,.5); glVertex3f(-1,.5, 1);
+        glTexCoord2f(.4,.5); glVertex3f(-.3,.5, 1);
+        glTexCoord2f(.4,0); glVertex3f(-.3,0, 1);
+
+        glTexCoord2f(.6,0); glVertex3f(.3,0, 1);
+        glTexCoord2f(.6,.5); glVertex3f(.3,.5, 1);
+        glTexCoord2f(1,.5); glVertex3f(1,.5, 1);
         glTexCoord2f(1,0); glVertex3f(1,0, 1);
+
+
 
         //  Back
         glNormal3f(0, 0, -1);
