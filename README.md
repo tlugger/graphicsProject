@@ -4,7 +4,7 @@
 
 #### This Project creates a scene in two different modes that allows navigation in first person view around a natural scene to find a ghost.
 
-#### The scene opens in a forested area in day mode. A ghost is placed randomly within the world, either out in the open or partially within a tree (it is a ghost after all). Use the arrow keys to navigate around the world and find the ghost. When you are close enough to the ghost, a message will display at the top left of the window telling you that you won the hunt. Use the 'd' key to switch to night mode for a more challenging ghost hunt.
+#### The scene opens in a forested area in day mode. A ghost is placed randomly within the world, either out in the open or partially within a tree (it is a ghost after all). Use the arrow keys to navigate around the world and find the ghost. When you are close enough to the ghost, a message will display at the top left of the window telling you that you won the hunt. Use the 'd' key to switch to night mode for a more challenging ghost hunt. Use the 'c' key to move the camera directly to the same position of the ghost.
 
 ### What Remains: I still need to fix my trees to make them look more natural. I would also like to add natural looking bushes to add to the scene.
 
@@ -17,6 +17,7 @@
 *  arrows     look left/right, move forward/backward
 *  w          Increases camera view angle
 *  s          Decreases camera view angle
+*  c          Move camera directly to the ghost (cheat to win)
 *  f          Toggles FPV/perspective views
 *  l          Toggles lighting
 *  a/A        Decrease/increase ambient light

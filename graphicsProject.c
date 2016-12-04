@@ -7,6 +7,7 @@
  *  f          Toggles fpv/perspective views
  *  w          Increases camera view angle
  *  s          Decreases camera view angle
+ *  c          Move camera directly to the ghost (cheat to win)
  *  l          Toggles lighting
  *  a/A        Decrease/increase ambient light
  *  F1         Toggle smooth/flat shading
@@ -22,6 +23,7 @@
  */
 #include "CSCIx229.h"
 #include <time.h>
+
 
 // Globals
 int axes=0;       //  Display axes
@@ -64,16 +66,11 @@ int zh        =  90;  // Light azimuth
 float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
-unsigned int texture[4];
+unsigned int texture[5];
 double targetPos[2];
 double Heights[324];
 
-static void fillHeights(){
-        for (int k = 0; k < 324; k++) {
-                Heights[k] = abs(rand() % 2)+0.5;
-        }
 
-}
 
 /*
  *  Draw vertex in polar coordinates with normal
@@ -86,18 +83,20 @@ static void Vertex(double th,double ph)
         //  For a sphere at the origin, the position
         //  and normal vectors are the same
         glNormal3d(x,y,z);
+        glTexCoord2d(th/(360.0/3),ph/((180.0+0.5)/3));
         glVertex3d(x,y,z);
 }
 
 
 static void DVertex(double th,double ph)
 {
-        double x = Sin(th)*Cos(ph);
-        double y = Cos(th)*Cos(ph);
-        double z =         Sin(ph);
+        double x = -Sin(th)*Cos(ph);
+        double y =  Cos(th)*Cos(ph);
+        double z =          Sin(ph);
         //  For a sphere at the origin, the position
         //  and normal vectors are the same
         glNormal3d(x,fabs(y),z);
+        glTexCoord2d(th/(360.0/3),ph/((180.0+0.5)/3));
         glVertex3d(x,fabs(y),z);
 }
 
@@ -232,8 +231,8 @@ static void tree(double x, double z, double radius, double height){
                 glBegin(GL_QUAD_STRIP);
                 for (int th=0; th<=360; th+=d)
                 {
-                        glTexCoord2f(th, ph); Vertex(th,ph);
-                        glTexCoord2f(th, ph+d); Vertex(th,ph+d);
+                        Vertex(th,ph);
+                        Vertex(th,ph+d);
                 }
                 glEnd();
 
@@ -314,12 +313,17 @@ static void target(double x, double z, double r){
         glPushMatrix();
         glTranslated(x, .03, z);
         glScaled(r,r*4,r); // Make half dome
-        glColor4f(1,1,1,0.01*75);
+        glColor4f(.5,1,.5,0.1*100);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[4]);
         //  Enable blending
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA,GL_ONE);
         // Draw dome on top of nose cone
         int theta, phi;
+
         for (phi=0; phi<360; phi+=inc) {
                 glBegin(GL_QUAD_STRIP);
                 for (theta=0; theta<=90; theta+=inc) {
@@ -329,9 +333,9 @@ static void target(double x, double z, double r){
                 glEnd();
         }
         glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
         glPopMatrix();
 }
-
 
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
@@ -606,9 +610,6 @@ void key(unsigned char ch,int x,int y)
         //  Exit on ESC
         if (ch == 27)
                 exit(0);
-        //  Reset view angle
-        else if (ch == '0')
-                th = ph = 0;
         //  Toggle axes
         else if (ch == 'x' || ch == 'X')
                 axes = 1-axes;
@@ -618,11 +619,6 @@ void key(unsigned char ch,int x,int y)
         //  Toggle light movement
         else if (ch == 'm' || ch == 'M')
                 move = 1-move;
-        //  Move light
-        else if (ch == '<')
-                zh += 1;
-        else if (ch == '>')
-                zh -= 1;
         //  Change field of view angle
         else if (ch == '-' && ch>1)
                 fov--;
@@ -640,17 +636,17 @@ void key(unsigned char ch,int x,int y)
                 ambient -= 5;
         else if (ch=='A' && ambient<100)
                 ambient += 5;
-        else if (ch=='r')
-                rep -= 1;
-        else if (ch=='R')
-                rep += 1;
         else if (ch == 'd')
                 day = 1-day;
         else if (ch == 'w')
                 Ly += 2;
         else if (ch == 's')
                 Ly -= 2;
-        if (rep<1) rep = 1;
+        else if (ch == 'c') {
+                Fx = targetPos[0];
+                Fz = targetPos[1];
+        }
+
 
         //  Reproject
         if (fpv)
@@ -685,9 +681,14 @@ void reshape(int width,int height)
 int main(int argc,char* argv[])
 {
         srand(time(NULL));
-        targetPos[0] = rand() % 5 + .25;
-        targetPos[1] = rand() % 5 + .25;
-        fillHeights();
+
+        targetPos[0] = (rand() % 4) + .05;
+        targetPos[1] = (rand() % 4) + .05;
+
+        for (int k = 0; k < 324; k++) {
+                Heights[k] = (rand() % 2)+0.5;
+        }
+
         //  Initialize GLUT
         glutInit(&argc,argv);
         //  Request double buffered, true color window with Z buffering at 600x600
@@ -705,6 +706,7 @@ int main(int argc,char* argv[])
         texture[1] = LoadTexBMP("bark.bmp");
         texture[2] = LoadTexBMP("leaves.bmp");
         texture[3] = LoadTexBMP("flashlight.bmp");
+        texture[4] = LoadTexBMP("ghost.bmp");
         // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
         sky[1] = LoadTexBMP("negx.bmp");
