@@ -68,7 +68,7 @@ int rep       =   1;
 int sky[6];
 unsigned int texture[5];
 double targetPos[2];
-double Heights[324];
+double Heights[350];
 
 
 
@@ -337,6 +337,83 @@ static void target(double x, double z, double r){
         glPopMatrix();
 }
 
+static void cabin(double x, double y, double z, double dx, double dy, double dz, double th){
+        float white[] = {1,1,1,1};
+        float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+        glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
+
+        //  Save transformation
+        glPushMatrix();
+        //  Offset
+        glTranslated(x,y,z);
+        glRotated(th,0,1,0);
+        glScaled(dx,dy,dz);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[3]);
+
+        //  Walls
+        glBegin(GL_QUADS);
+        //  Front
+        glColor3f(1, 1, 1);
+        glNormal3f(0,0,1);
+        glTexCoord2f(0,0); glVertex3f(-1,0, 1);
+        glTexCoord2f(0,1); glVertex3f(-1,1, 1);
+        glTexCoord2f(1,1); glVertex3f(+1,+1, 1);
+        glTexCoord2f(1,0); glVertex3f(1,0, 1);
+
+        //  Back
+        glNormal3f(0, 0, -1);
+        glTexCoord2f(1,0); glVertex3f(+1,0,-1);
+        glTexCoord2f(0,0); glVertex3f(-1,0,-1);
+        glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+        glTexCoord2f(1,1); glVertex3f(+1,+1,-1);
+        //  Right
+        glNormal3f(1, 0, 0);
+        glTexCoord2f(1,0); glVertex3f(+1,0,+1);
+        glTexCoord2f(0,0); glVertex3f(+1,0,-1);
+        glTexCoord2f(0,1); glVertex3f(+1,+1,-1);
+        glTexCoord2f(1,1); glVertex3f(+1,+1,+1);
+        //  Left
+        glNormal3f(-1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(-1,0,-1);
+        glTexCoord2f(1,0); glVertex3f(-1,0,+1);
+        glTexCoord2f(1,1); glVertex3f(-1,+1,+1);
+        glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+        // Roof
+        glNormal3f(0, 1, 0);
+        glTexCoord2f(1,0); glVertex3f(-1,+1,+1);
+        glTexCoord2f(0,0); glVertex3f(-1,+1,-1);
+        glTexCoord2f(0,1); glVertex3f(+0,+1.5,-1);
+        glTexCoord2f(1,1); glVertex3f(+0,+1.5,+1);
+
+        glNormal3f(0, 1, 0);
+        glTexCoord2f(1,1); glVertex3f(0,+1.5,+1);
+        glTexCoord2f(0,1); glVertex3f(0,+1.5,-1);
+        glTexCoord2f(0,0); glVertex3f(+1,+1,-1);
+        glTexCoord2f(1,0); glVertex3f(+1,+1,+1);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glNormal3f(0, 0, 1);
+        glTexCoord2f(0,0); glVertex3f(-1, +1, +1);
+        glTexCoord2f(.5,.5); glVertex3f(0, 1.5, +1);
+        glTexCoord2f(1,0); glVertex3f(+1, +1, +1);
+
+        glNormal3f(0, 0, -1);
+        glTexCoord2f(0,0); glVertex3f(-1, +1, -1);
+        glTexCoord2f(.5,.5); glVertex3f(0, 1.5, -1);
+        glTexCoord2f(1,0); glVertex3f(+1, +1, -1);
+        //  End
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+        glPopMatrix();
+}
+
 /*
  *  OpenGL (GLUT) calls this routine to display the scene
  */
@@ -455,12 +532,17 @@ void display()
 
         //  Draw scene
         ground(10);
+        cabin(0, 0, 0, .2, .3, .2, 0);
         int randSize;
         for (double i=0; i<90; i+=5) {
                 for(double j=0; j<90; j+=5) {
                         if (i != 45 || j != 45) {
-                                randSize = (int)(((i/10)*2)*((j/10)*2));
+                                if (i == 0 || j == 0)
+                                        randSize = (int)((((i)/10)*2)+(((j)/10)*2));
+                                else
+                                        randSize = (int)(((i/10)*2)*((j/10)*2));
                                 tree((i-45)/10, (j-45)/10, (.03 * Heights[randSize]), Heights[randSize]);
+
                         }
                 }
         }
@@ -705,7 +787,7 @@ int main(int argc,char* argv[])
         texture[0] = LoadTexBMP("ground.bmp");
         texture[1] = LoadTexBMP("bark.bmp");
         texture[2] = LoadTexBMP("leaves.bmp");
-        texture[3] = LoadTexBMP("flashlight.bmp");
+        texture[3] = LoadTexBMP("cabin.bmp");
         texture[4] = LoadTexBMP("ghost.bmp");
         // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
