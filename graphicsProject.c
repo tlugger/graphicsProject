@@ -41,10 +41,10 @@ int num = 500; // Draw a ton of squares to make up the ground so the flashlight 
 int fpv = 1; // FPV mode
 int l = 0; // Global variable for look angle
 double Fx = 0.0; // Global variable for camera x pos
-double Fy = 0.05; // Global variable for camera y pos
+double Fy = 0.08; // Global variable for camera y pos
 double Fz = 0.0; // Global variable for camera z pos
 double Lx = 0; // Some large radius for the fpv camera to move around
-double Ly = 0.05;
+double Ly = 0.08;
 double Lz = 10; // Some large radius for the fpv camera to move around // Global variables for what camera looks at
 // Light values
 int distance  =   5;  // Light distance
@@ -380,7 +380,6 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glEnd();
         glDisable(GL_TEXTURE_2D);
 
-
         // Door
         glEnable(GL_TEXTURE_2D);
         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
@@ -425,20 +424,64 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glTexCoord2f(0,0); glVertex3f(-1,0,-1);
         glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
         glTexCoord2f(1,1); glVertex3f(+1,+1,-1);
+
+
         //  Right
         glNormal3f(1, 0, 0);
         glTexCoord2f(1,0); glVertex3f(+1,0,+1);
         glTexCoord2f(0,0); glVertex3f(+1,0,-1);
+        glTexCoord2f(0,.2); glVertex3f(+1,+.2,-1);
+        glTexCoord2f(1,.2); glVertex3f(+1,+.2,+1);
+
+        glTexCoord2f(1,.4); glVertex3f(+1,.4,+1);
+        glTexCoord2f(0,.4); glVertex3f(+1,.4,-1);
         glTexCoord2f(0,1); glVertex3f(+1,+1,-1);
         glTexCoord2f(1,1); glVertex3f(+1,+1,+1);
-        //  Left
-        glNormal3f(-1, 0, 0);
-        glTexCoord2f(0,0); glVertex3f(-1,0,-1);
-        glTexCoord2f(1,0); glVertex3f(-1,0,+1);
-        glTexCoord2f(1,1); glVertex3f(-1,+1,+1);
-        glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+
+        glTexCoord2f(.4,.2); glVertex3f(+1,.2,-.2);
+        glTexCoord2f(0,.2); glVertex3f(+1,.2,-1);
+        glTexCoord2f(0,.4); glVertex3f(+1,.4,-1);
+        glTexCoord2f(.4,.4); glVertex3f(+1,.4,-.2);
+
+        glTexCoord2f(1,.2); glVertex3f(+1,.2,.2);
+        glTexCoord2f(.6,.2); glVertex3f(+1,.2,1);
+        glTexCoord2f(.6,.4); glVertex3f(+1,.4,1);
+        glTexCoord2f(1,.4); glVertex3f(+1,.4,.2);
+
         glEnd();
         glDisable(GL_TEXTURE_2D);
+
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[3]);
+        glBegin(GL_QUADS);
+        //  Left
+        glNormal3f(-1, 0, 0);
+        glTexCoord2f(1,0); glVertex3f(-1,0,+1);
+        glTexCoord2f(0,0); glVertex3f(-1,0,-1);
+        glTexCoord2f(0,.2); glVertex3f(-1,+.2,-1);
+        glTexCoord2f(1,.2); glVertex3f(-1,+.2,+1);
+
+        glTexCoord2f(1,.4); glVertex3f(-1,.4,+1);
+        glTexCoord2f(0,.4); glVertex3f(-1,.4,-1);
+        glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+        glTexCoord2f(1,1); glVertex3f(-1,+1,+1);
+
+        glTexCoord2f(.4,.2); glVertex3f(-1,.2,-.2);
+        glTexCoord2f(0,.2); glVertex3f(-1,.2,-1);
+        glTexCoord2f(0,.4); glVertex3f(-1,.4,-1);
+        glTexCoord2f(.4,.4); glVertex3f(-1,.4,-.2);
+
+        glTexCoord2f(1,.2); glVertex3f(-1,.2,.2);
+        glTexCoord2f(.6,.2); glVertex3f(-1,.2,1);
+        glTexCoord2f(.6,.4); glVertex3f(-1,.4,1);
+        glTexCoord2f(1,.4); glVertex3f(-1,.4,.2);
+
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+
         // Roof
         glEnable(GL_TEXTURE_2D);
         glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
