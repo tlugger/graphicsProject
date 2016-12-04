@@ -3,6 +3,7 @@
  *  Computer Graphics Final Project
  *
  *  Key bindings:
+ *  o          Open/Close cabin door
  *  d          Toggles day/night mode
  *  f          Toggles fpv/perspective views
  *  w          Increases camera view angle
@@ -66,9 +67,10 @@ int zh        =  90;  // Light azimuth
 float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
-unsigned int texture[5];
+unsigned int texture[7];
 double targetPos[2];
 double Heights[350];
+int door = 1;
 
 
 
@@ -337,7 +339,7 @@ static void target(double x, double z, double r){
         glPopMatrix();
 }
 
-static void cabin(double x, double y, double z, double dx, double dy, double dz, double th){
+static void cabin(double x, double y, double z, double dx, double dy, double dz, double th, int closed){
         float white[] = {1,1,1,1};
         float Emission[]  = {0.0,0.0,0.01*emission,1.0};
         glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
@@ -375,9 +377,48 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glTexCoord2f(.6,.5); glVertex3f(.3,.5, 1);
         glTexCoord2f(1,.5); glVertex3f(1,.5, 1);
         glTexCoord2f(1,0); glVertex3f(1,0, 1);
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
 
 
+        // Door
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[5]);
+        if (closed) {
+                glBegin(GL_QUADS);
+                glNormal3f(0,0,1);
+                glTexCoord2f(0,0); glVertex3f(-.3,0, 1);
+                glTexCoord2f(0,1); glVertex3f(-.3,.5, 1);
+                glTexCoord2f(1,1); glVertex3f(.3,.5, 1);
+                glTexCoord2f(1,0); glVertex3f(.3,0, 1);
+                glEnd();
+        }
+        else{
+                glBegin(GL_QUADS);
+                glNormal3f(1,0,0);
+                glTexCoord2f(0,0); glVertex3f(-.3,0, 1);
+                glTexCoord2f(0,1); glVertex3f(-.3,.5, 1);
+                glTexCoord2f(.5,1); glVertex3f(-.3,.5, 1.3);
+                glTexCoord2f(.5,0); glVertex3f(-.3,0, 1.3);
+                glEnd();
 
+                glBegin(GL_QUADS);
+                glNormal3f(1,0,0);
+                glTexCoord2f(1,0); glVertex3f(.3,0, 1);
+                glTexCoord2f(1,1); glVertex3f(.3,.5, 1);
+                glTexCoord2f(.5,1); glVertex3f(.3,.5, 1.3);
+                glTexCoord2f(.5,0); glVertex3f(.3,0, 1.3);
+                glEnd();
+
+        }
+
+        glDisable(GL_TEXTURE_2D);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[3]);
+        glBegin(GL_QUADS);
         //  Back
         glNormal3f(0, 0, -1);
         glTexCoord2f(1,0); glVertex3f(+1,0,-1);
@@ -396,12 +437,20 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glTexCoord2f(1,0); glVertex3f(-1,0,+1);
         glTexCoord2f(1,1); glVertex3f(-1,+1,+1);
         glTexCoord2f(0,1); glVertex3f(-1,+1,-1);
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
         // Roof
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[6]);
+
+        glBegin(GL_QUADS);
         glNormal3f(0, 1, 0);
         glTexCoord2f(1,0); glVertex3f(-1,+1,+1);
         glTexCoord2f(0,0); glVertex3f(-1,+1,-1);
         glTexCoord2f(0,1); glVertex3f(+0,+1.5,-1);
         glTexCoord2f(1,1); glVertex3f(+0,+1.5,+1);
+
 
         glNormal3f(0, 1, 0);
         glTexCoord2f(1,1); glVertex3f(0,+1.5,+1);
@@ -409,6 +458,11 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glTexCoord2f(0,0); glVertex3f(+1,+1,-1);
         glTexCoord2f(1,0); glVertex3f(+1,+1,+1);
         glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[3]);
 
         glBegin(GL_TRIANGLES);
         glNormal3f(0, 0, 1);
@@ -545,7 +599,9 @@ void display()
 
         //  Draw scene
         ground(10);
-        cabin(0, 0, 0, .2, .3, .2, 0);
+
+        cabin(0, 0, 0, .2, .3, .2, 0, door);
+
         int randSize;
         for (double i=0; i<90; i+=5) {
                 for(double j=0; j<90; j+=5) {
@@ -741,6 +797,8 @@ void key(unsigned char ch,int x,int y)
                 Fx = targetPos[0];
                 Fz = targetPos[1];
         }
+        else if (ch == 'o')
+                door = 1 - door;
 
 
         //  Reproject
@@ -802,6 +860,8 @@ int main(int argc,char* argv[])
         texture[2] = LoadTexBMP("leaves.bmp");
         texture[3] = LoadTexBMP("cabin.bmp");
         texture[4] = LoadTexBMP("ghost.bmp");
+        texture[5] = LoadTexBMP("door.bmp");
+        texture[6] = LoadTexBMP("roof.bmp");
         // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
         sky[1] = LoadTexBMP("negx.bmp");

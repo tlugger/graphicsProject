@@ -21,6 +21,7 @@ OpenGL can be installed by following the information on [this webpage](http://ww
 * `./graphicsProject`
 
 ###### Key bindings:
+*  o          Open/Close cabin door
 *  d          Toggles day/night mode
 *  arrows     look left/right, move forward/backward
 *  w          Increases camera view angle
