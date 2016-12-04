@@ -744,6 +744,15 @@ void special(int key,int x,int y)
         th %= 360;
         ph %= 360;
 
+        if (Fx > 4.9)
+                Fx = 4.9;
+        else if (Fz > 4.9)
+                Fz = 4.9;
+        else if (Fx < -4.9)
+                Fx = -4.9;
+        else if (Fz < -4.9)
+                Fz = -4.9;
+
         //  Update projection
         if (fpv)
                 Project(1,fov,asp,dim);
