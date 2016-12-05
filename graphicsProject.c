@@ -67,7 +67,7 @@ int zh        =  90;  // Light azimuth
 float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
-unsigned int texture[7];
+unsigned int texture[8];
 double targetPos[2];
 double Heights[350];
 int door = 1;
@@ -488,14 +488,14 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glBindTexture(GL_TEXTURE_2D,texture[6]);
 
         glBegin(GL_QUADS);
-        glNormal3f(0, 1, 0);
+        glNormal3f(-.5, 1, 0);
         glTexCoord2f(1,0); glVertex3f(-1,+1,+1);
         glTexCoord2f(0,0); glVertex3f(-1,+1,-1);
         glTexCoord2f(0,1); glVertex3f(+0,+1.5,-1);
         glTexCoord2f(1,1); glVertex3f(+0,+1.5,+1);
 
 
-        glNormal3f(0, 1, 0);
+        glNormal3f(.5, 1, 0);
         glTexCoord2f(1,1); glVertex3f(0,+1.5,+1);
         glTexCoord2f(0,1); glVertex3f(0,+1.5,-1);
         glTexCoord2f(0,0); glVertex3f(+1,+1,-1);
@@ -521,6 +521,40 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glEnd();
         glDisable(GL_TEXTURE_2D);
 
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslated(x,y,z);
+        glRotated(th,0,1,0);
+        glScaled(dx,dy,dz);
+
+        glColor4f(1,1,1,0.01*100);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[6]);
+
+        glBegin(GL_QUADS);
+
+        glNormal3f(1, 0, 0);
+        glVertex3f(1, .2, -.2);
+        glVertex3f(1, .4, -.2);
+        glVertex3f(1, .4, .2);
+        glVertex3f(1, .2, .2);
+
+        glNormal3f(-1, 0, 0);
+        glVertex3f(-1, .2, -.2);
+        glVertex3f(-1, .4, -.2);
+        glVertex3f(-1, .4, .2);
+        glVertex3f(-1, .2, .2);
+
+        glEnd();
+
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
         glPopMatrix();
 }
 
@@ -643,8 +677,6 @@ void display()
         //  Draw scene
         ground(10);
 
-        cabin(0, 0, 0, .2, .3, .2, 0, door);
-
         int randSize;
         for (double i=0; i<90; i+=5) {
                 for(double j=0; j<90; j+=5) {
@@ -658,6 +690,8 @@ void display()
                         }
                 }
         }
+
+        cabin(0, 0, 0, .2, .3, .2, 0, door);
 
         target(targetPos[0], targetPos[1], .03);
 
@@ -914,6 +948,7 @@ int main(int argc,char* argv[])
         texture[4] = LoadTexBMP("ghost.bmp");
         texture[5] = LoadTexBMP("door.bmp");
         texture[6] = LoadTexBMP("roof.bmp");
+        texture[7] = LoadTexBMP("glass.bmp");
         // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
         sky[1] = LoadTexBMP("negx.bmp");
