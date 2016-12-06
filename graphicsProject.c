@@ -181,6 +181,7 @@ static void tree(double x, double z, double radius, double height){
         glPushMatrix();
         glTranslated(x,0,z);
 
+
         double angle = 0.0;
         double angle_stepsize = 0.1;
 
@@ -207,6 +208,7 @@ static void tree(double x, double z, double radius, double height){
         glEnd();
         glPopMatrix();
         glDisable(GL_TEXTURE_2D);
+
 
         // Draw sphere on top of cylinder
         glPushMatrix();
@@ -691,6 +693,8 @@ void display()
                 }
         }
 
+        tree(0, 1, .02, .5);
+
         cabin(0, 0, 0, .2, .3, .2, 0, door);
 
         target(targetPos[0], targetPos[1], .03);
@@ -921,8 +925,8 @@ int main(int argc,char* argv[])
 {
         srand(time(NULL));
 
-        targetPos[0] = (rand() % 4) + .05;
-        targetPos[1] = (rand() % 4) + .05;
+        targetPos[0] = ((rand() % 5) - (rand() % 5)) + .1;
+        targetPos[1] = ((rand() % 5) - (rand() % 5)) + .1;
 
         for (int k = 0; k < 324; k++) {
                 Heights[k] = (rand() % 2)+0.5;
