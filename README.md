@@ -2,9 +2,10 @@
 
 ### Tyler Lugger
 
-### This Project creates a scene in two different modes that allows navigation in first person view around a natural scene to find a ghost.
+#### This Project creates a scene in two different modes that allows navigation in first person view around a natural scene to find a ghost.
 
-#### The scene opens in a forested area in day mode. The camera is inside of a cabin in the middle of the forrest. The doors of the cabin can be opened using the 'o' key. A ghost is placed randomly within the world, either out in the open or partially within a tree (it is a ghost after all). Use the arrow keys to navigate around the world and find the ghost. When you are close enough to the ghost, a message will display at the top left of the window telling you that you won the hunt. Use the 'd' key to switch to night mode for a more challenging ghost hunt. Use the 'c' key to move the camera directly to the same position of the ghost.
+
+ The scene opens in a forested area in day mode. The camera is inside of a cabin in the middle of the forrest. The doors of the cabin can be opened using the 'o' key. The cabin contains transparent windows and a fireplace that extends through the roof. Outside of the cabin there is a light above the doors that will turn on in night mode to light the entrance of the cabin. Firewood is stacked outside of the cabin. A ghost is placed randomly within the world, either out in the open or partially within a tree (it is a ghost after all). Use the arrow keys to navigate around the world and find the ghost. When you are close enough to the ghost, a message will display at the top left of the window telling you that you won the hunt. Use the 'd' key to switch to night mode for a more challenging ghost hunt. Use the 'c' key to move the camera directly to the same position of the ghost.
 
 
 #### The two unique modes for this scene are:
