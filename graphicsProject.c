@@ -67,7 +67,7 @@ int zh        =  90;  // Light azimuth
 float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
-unsigned int texture[8];
+unsigned int texture[9];
 double targetPos[2];
 double Heights[350];
 int door = 1;
@@ -523,6 +523,69 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glEnd();
         glDisable(GL_TEXTURE_2D);
 
+        // Draw metal light above door
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[8]);
+
+        glBegin(GL_QUADS);
+        glNormal3f(-1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(-.01, 1.04, 1);
+        glTexCoord2f(0,1); glVertex3f(-.01, 1.05, 1);
+        glTexCoord2f(10,1); glVertex3f(-.01, 1.05, 1.2);
+        glTexCoord2f(10,0); glVertex3f(-.01, 1.04, 1.2);
+
+        glNormal3f(1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(.01, 1.04, 1);
+        glTexCoord2f(0,1); glVertex3f(.01, 1.05, 1);
+        glTexCoord2f(10,1); glVertex3f(.01, 1.05, 1.2);
+        glTexCoord2f(10,0); glVertex3f(.01, 1.04, 1.2);
+
+        glNormal3f(0, 1, 0);
+        glTexCoord2f(0,0); glVertex3f(-.01, 1.05, 1);
+        glTexCoord2f(1,0); glVertex3f(.01, 1.05, 1);
+        glTexCoord2f(1,10); glVertex3f(.01, 1.05, 1.2);
+        glTexCoord2f(0,10); glVertex3f(-.01, 1.05, 1.2);
+
+        glNormal3f(0, -1, 0);
+        glTexCoord2f(0,0); glVertex3f(-.01, 1.04, 1);
+        glTexCoord2f(1,0); glVertex3f(.01, 1.04, 1);
+        glTexCoord2f(1,10); glVertex3f(.01, 1.04, 1.2);
+        glTexCoord2f(0,10); glVertex3f(-.01, 1.04, 1.2);
+
+        glNormal3f(0, 0, 1);
+        glTexCoord2f(0,0); glVertex3f(-.01, 1.04, 1.2);
+        glTexCoord2f(0,1); glVertex3f(-.01, 1.05, 1.2);
+        glTexCoord2f(1,1); glVertex3f(.01, 1.05, 1.2);
+        glTexCoord2f(1,0); glVertex3f(.01, 1.04, 1.2);
+
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+        double angle = 0.0;
+        double angle_stepsize = 0.1;
+
+        /** Draw the tube */
+        //  Enable textures
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[8]);
+
+        glBegin(GL_QUAD_STRIP);
+        //angle = 0.0;
+        while( angle < 2*M_PI+.1 ) {
+                double c = 0.05 * cos(angle);
+                double s = 0.05 * sin(angle);
+                double c2 = 0.01 * cos(angle);
+                double s2 = 0.01 * sin(angle);
+                glNormal3f(cos(angle), 0, sin(angle));
+                glTexCoord2f((angle / (2*M_PI+.1)), 1); glVertex3f(c2, 1.04, s2+1.19);
+                glTexCoord2f((angle / (2*M_PI+.1)), 0); glVertex3f(c, .98, s+1.19);
+                angle = angle + angle_stepsize;
+        }
+
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
         glPopMatrix();
 
         glPushMatrix();
@@ -643,7 +706,6 @@ void display()
                 float Direction[] = {Sin(l),Ly/100,Cos(l)};
                 float Position[]  = {Fx,Fy,Fz,1.0};
 
-
                 //  OpenGL should normalize normal vectors
                 glEnable(GL_NORMALIZE);
                 //  Enable lighting
@@ -674,6 +736,30 @@ void display()
                 glLightf(GL_LIGHT0,GL_CONSTANT_ATTENUATION,at0/100.0);
                 glLightf(GL_LIGHT0,GL_LINEAR_ATTENUATION,at1/100.0);
                 glLightf(GL_LIGHT0,GL_QUADRATIC_ATTENUATION,at2/100.0);
+
+                sco = 25;
+
+                float Direction2[] = {0,-1,.238};
+                float Position2[]  = {0,.312,.238, 1.0};
+
+                glEnable(GL_LIGHT1);
+
+                //  Set ambient, diffuse, specular components and position of light 0
+                glLightfv(GL_LIGHT1,GL_AMBIENT,Ambient);
+                glLightfv(GL_LIGHT1,GL_DIFFUSE,Diffuse);
+                glLightfv(GL_LIGHT1,GL_SPECULAR,Specular);
+                glLightfv(GL_LIGHT1,GL_POSITION,Position2);
+
+                //  Set spotlight parameters
+                glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,Direction2);
+                glLightf(GL_LIGHT1,GL_SPOT_CUTOFF,sco);
+                glLightf(GL_LIGHT1,GL_SPOT_EXPONENT,Exp);
+                //  Set attenuation
+                glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION,at0/100.0);
+                glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION,at1/100.0);
+                glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION,at2/100.0);
+
+
         }
 
         //  Draw scene
@@ -695,6 +781,7 @@ void display()
 
         tree(0, 1, .02, .5);
 
+        ball(0,.312-.012,.238, .005);
         cabin(0, 0, 0, .2, .3, .2, 0, door);
 
         target(targetPos[0], targetPos[1], .03);
@@ -953,6 +1040,7 @@ int main(int argc,char* argv[])
         texture[5] = LoadTexBMP("door.bmp");
         texture[6] = LoadTexBMP("roof.bmp");
         texture[7] = LoadTexBMP("glass.bmp");
+        texture[8] = LoadTexBMP("metal.bmp");
         // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
         sky[1] = LoadTexBMP("negx.bmp");
