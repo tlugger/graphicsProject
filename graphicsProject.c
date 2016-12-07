@@ -67,7 +67,7 @@ int zh        =  90;  // Light azimuth
 float ylight  =   3.0;  // Elevation of light
 int rep       =   1;
 int sky[6];
-unsigned int texture[9];
+unsigned int texture[12];
 double targetPos[2];
 double Heights[350];
 int door = 1;
@@ -341,6 +341,65 @@ static void target(double x, double z, double r){
         glPopMatrix();
 }
 
+static void firewood(double x, double y, double z, double radius, double height, double th){
+        float white[] = {1,1,1,1};
+        float Emission[]  = {0.0,0.0,0.01*emission,1.0};
+        glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,shiny);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,white);
+        glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,Emission);
+
+        //  Save transformation
+        glPushMatrix();
+        //  Offset
+        glTranslated(x,y,z);
+        glRotated(th,0,0,1);
+
+        double angle = 0.0;
+        double angle_stepsize = 0.1;
+
+        /** Draw the tube */
+        //  Enable textures
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[1]);
+
+        glColor3f(1,1,1);
+        glBegin(GL_QUAD_STRIP);
+        //angle = 0.0;
+        while( angle < 2*M_PI+.1 ) {
+                double c = radius * cos(angle);
+                double s = radius * sin(angle);
+                glNormal3f(cos(angle), 0, sin(angle));
+                glTexCoord2f((angle / (2*M_PI+.1)), .2); glVertex3f(c, height, s);
+                glTexCoord2f((angle / (2*M_PI+.1)), 0); glVertex3f(c, 0.0, s);
+                angle = angle + angle_stepsize;
+        }
+
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[9]);
+
+
+        glNormal3f(0,1,0);
+        glBegin(GL_TRIANGLE_FAN);
+        glTexCoord2f(0.5,0.5);
+        glVertex3f(0,height,0);
+        for (int k=0; k<=360; k+=10)
+        {
+                glTexCoord2f(0.4*Cos(k)+0.5,0.4*Sin(k)+0.5);
+                glVertex3f(radius*Cos(k), height,radius*Sin(k));
+        }
+        glEnd();
+
+
+        glPopMatrix();
+        glDisable(GL_TEXTURE_2D);
+
+}
+
 static void cabin(double x, double y, double z, double dx, double dy, double dz, double th, int closed){
         float white[] = {1,1,1,1};
         float Emission[]  = {0.0,0.0,0.01*emission,1.0};
@@ -558,6 +617,75 @@ static void cabin(double x, double y, double z, double dx, double dy, double dz,
         glTexCoord2f(0,1); glVertex3f(-.01, 1.05, 1.2);
         glTexCoord2f(1,1); glVertex3f(.01, 1.05, 1.2);
         glTexCoord2f(1,0); glVertex3f(.01, 1.04, 1.2);
+
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+        // Draw fireplace inside the cabin
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[10]);
+
+        glBegin(GL_QUADS);
+
+        glNormal3f(-1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(0, 0, -.99);
+        glTexCoord2f(2,0); glVertex3f(0, 0, -.75);
+        glTexCoord2f(2,2); glVertex3f(0, .25,-.75);
+        glTexCoord2f(0,2); glVertex3f(0, .25,-.99);
+
+        glNormal3f(1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(.5, 0, -.99);
+        glTexCoord2f(1,0); glVertex3f(.5, 0, -.75);
+        glTexCoord2f(1,1); glVertex3f(.5, .25,-.75);
+        glTexCoord2f(0,1); glVertex3f(.5, .25,-.99);
+
+        glNormal3f(0, 1, 0);
+        glTexCoord2f(0,0); glVertex3f(0, .25, -.99);
+        glTexCoord2f(0,2); glVertex3f(0, .25, -.75);
+        glTexCoord2f(2,2); glVertex3f(.5, .25, -.75);
+        glTexCoord2f(2,0); glVertex3f(.5, .25, -.99);
+
+
+        glNormal3f(-1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(.15, .25, -.99);
+        glTexCoord2f(.9,0); glVertex3f(.15, .25, -.75);
+        glTexCoord2f(.9,12); glVertex3f(.15, 1.7,-.75);
+        glTexCoord2f(0,12); glVertex3f(.15, 1.7,-.99);
+
+        glNormal3f(1, 0, 0);
+        glTexCoord2f(0,0); glVertex3f(.35, .25, -.99);
+        glTexCoord2f(.9,0); glVertex3f(.35, .25, -.75);
+        glTexCoord2f(.9,12); glVertex3f(.35, 1.7,-.75);
+        glTexCoord2f(0,12); glVertex3f(.35, 1.7,-.99);
+
+        glNormal3f(0, 0, 1);
+        glTexCoord2f(0,0); glVertex3f(.15, .25, -.75);
+        glTexCoord2f(.9,0); glVertex3f(.35, .25, -.75);
+        glTexCoord2f(.9,12); glVertex3f(.35, 1.7,-.75);
+        glTexCoord2f(0,12); glVertex3f(.15, 1.7,-.75);
+
+        glNormal3f(0, 0, -1);
+        glTexCoord2f(0,0); glVertex3f(.15, .25, -.99);
+        glTexCoord2f(.9,0); glVertex3f(.35, .25, -.99);
+        glTexCoord2f(.9,12); glVertex3f(.35, 1.7,-.99);
+        glTexCoord2f(0,12); glVertex3f(.15, 1.7,-.99);
+
+        glEnd();
+        glDisable(GL_TEXTURE_2D);
+
+        glEnable(GL_TEXTURE_2D);
+        glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
+        glBindTexture(GL_TEXTURE_2D,texture[11]);
+
+        glBegin(GL_QUADS);
+
+        glNormal3f(0, 0, 1);
+        glTexCoord2f(0,0); glVertex3f(0, 0, -.75);
+        glTexCoord2f(1,0); glVertex3f(.5, 0, -.75);
+        glTexCoord2f(1,1); glVertex3f(.5, .25,-.75);
+        glTexCoord2f(0,1); glVertex3f(0, .25,-.75);
 
         glEnd();
         glDisable(GL_TEXTURE_2D);
@@ -782,6 +910,15 @@ void display()
         tree(0, 1, .02, .5);
 
         ball(0,.312-.012,.238, .005);
+
+        firewood(.2, .02, -.14, .02, .05, -90);
+        firewood(.2, .02, -.1, .02, .05, -90);
+        firewood(.2, .02, -.06, .02, .05, -90);
+        firewood(.2, .02, -.02, .02, .05, -90);
+        firewood(.2, .055, -.12, .02, .05, -90);
+        firewood(.2, .055, -.08, .02, .05, -90);
+        firewood(.22, 0, -.18, .02, .05, 0);
+
         cabin(0, 0, 0, .2, .3, .2, 0, door);
 
         target(targetPos[0], targetPos[1], .03);
@@ -1041,6 +1178,9 @@ int main(int argc,char* argv[])
         texture[6] = LoadTexBMP("roof.bmp");
         texture[7] = LoadTexBMP("glass.bmp");
         texture[8] = LoadTexBMP("metal.bmp");
+        texture[9] = LoadTexBMP("rings.bmp");
+        texture[10] = LoadTexBMP("brick.bmp");
+        texture[11] = LoadTexBMP("fireplace.bmp");
         // Load SkyCube textures
         sky[0] = LoadTexBMP("negz.bmp");
         sky[1] = LoadTexBMP("negx.bmp");
